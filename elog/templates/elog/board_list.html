@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <h1>Board List</h1>
+
+{% if board_list %}
+  {% crispy filter.form filter.form.helper %}
+  
+  {% render_table table %}
+
+{% else %}
+  <p>There are no boards in the database.</p>
+{% endif %}
+{% endblock %}
