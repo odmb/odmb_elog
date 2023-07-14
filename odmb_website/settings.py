@@ -83,20 +83,21 @@ WSGI_APPLICATION = 'odmb_website.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-          'read_default_file': '/etc/my.cnf',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'OPTIONS': {
+#          #'read_default_file': '/etc/my.cnf',
+#          'read_default_file': '/homes/jbkim/ODMB/wimp.workspace/odmb_elog/connect.cnf',
+#        },
+#    }
+#}
 
 
 # Password validation
