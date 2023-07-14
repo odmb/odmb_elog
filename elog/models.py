@@ -42,7 +42,8 @@ class Board(models.Model):
 
 
 def get_now():
-  return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+  #return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+  return datetime.datetime.now()
 
 class Log(models.Model):
   """Model representing a log."""
