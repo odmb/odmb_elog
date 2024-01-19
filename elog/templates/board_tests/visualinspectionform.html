@@ -1,0 +1,16 @@
+<div>
+  <b>Visual inspection</b>: Check that the ICs and connectors are soldered well 
+     on the board and create photographs for later reference.<br>
+{{ form.non_field_errors }}
+{% for field in form %}
+  {% if "logurl" not in field.id_for_label %}
+  <div>
+    {{ field.label_tag }} {{ field }}
+    {{ field.errors }}
+  </div>
+  {% elif field.value != None %}
+  <div>Link to log: <a href="{{ field.value }}">{{ field.value }}</a></div>
+  {% endif %}
+{% endfor %}
+  <p></p>
+</div>

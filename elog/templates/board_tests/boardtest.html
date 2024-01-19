@@ -1,0 +1,53 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <form enctype="multipart/form-data" action="" method="post">
+    {% csrf_token %}
+    <b>Filters:</b>
+    {% for field in testfilter %}
+      {{ field.label_tag }} {{ field }}, 
+      {{ field.errors }}
+    {% endfor %}
+    <br>
+    <input type="submit" class="btn btn-primary" name="submit_filter", value="Filter">
+    <p></p>
+    {{ form.non_field_errors }}
+    <div>
+      {{ form.date.label_tag }} {{ form.date }}
+      {{ form.date.errors }}
+      <p></p>
+    </div>
+    <div>
+      <label for="{{ form.board.id_for_label }}">{{form.board.label}}:</label> {{  form.board }}
+      {% if form.board.help_text %}
+      <p class="help">{{ form.board.help_text|safe }}</p>
+      {% endif %}
+      {% if form.board.errors %}
+        <ul>
+        {% for error in form.board.errors %}
+          <li>[Error] {{ error|escape }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+    <div>
+      {{ form.location.label_tag }} {{ form.location }}
+      {{ form.location.errors }}
+      <p></p>
+    </div>
+    <div>
+      {{ form.text.label_tag }} <br>
+      {{ form.text }}
+      {{ form.text.errors }}
+      <p></p>
+    </div>
+    <div>
+      <p>Reference: <a href=https://docs.google.com/document/d/1fAz7HfOIg_UNvVobAWMJ2iiMlWELLe3uz3RNUsuh2AQ/edit>Link</a></p>
+    </div>
+    {% for testform in testforms %}
+      {{ testform }}
+    {% endfor %}
+    {{ testformcollection }}
+    <input type="submit" name="submit_test" value="Submit">
+  </form>
+{% endblock %}
