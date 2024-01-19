@@ -3,12 +3,10 @@
 {% load crispy_forms_tags %}
 {% block content %}
   <h1>Board List</h1>
-
-{% if board_list %}
+  <button onclick="location.href='{% url 'board-create' %}'" type="button">Create new board</button>
   {% crispy filter.form filter.form.helper %}
-  
+{% if board_list %}
   {% render_table table %}
-
 {% else %}
   <p>There are no boards in the database.</p>
 {% endif %}

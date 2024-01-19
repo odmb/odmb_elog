@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import BoardType, Board, Location, Log, BoardStatus
+from .models import BoardType, Board, Location, Log, BoardStatus, Tests, TestResult
 
 #admin.site.register(BoardType)
 #admin.site.register(Board)
@@ -15,6 +15,10 @@ class BoardInline(admin.TabularInline):
 
 class LogInline(admin.TabularInline):
   model = Log
+  extra = 0
+
+class TestsInline(admin.TabularInline):
+  model = Tests
   extra = 0
 
 @admin.register(Board)
@@ -37,3 +41,7 @@ class BoardTypeAdmin(admin.ModelAdmin):
 class LocationAdmin(admin.ModelAdmin):
   list_display = ('name',)
   inlines = [BoardInline]
+
+@admin.register(Tests)
+class TestsAdmin(admin.ModelAdmin):
+  inlines = [LogInline]

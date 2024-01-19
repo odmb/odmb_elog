@@ -3,13 +3,15 @@
 {% block content %}
   <h1>Title: {{ board }}</h1>
 
-  <p><strong>Location:</strong>{{ board.location }}</p> 
-  <p><strong>Status:</strong>{{ board.status }}</p> 
-
+  <p><strong>Location: </strong>{{ board.location }}</p> 
+  <p><strong>Status: </strong>{{ board.status }}</p> 
+  <p><strong>Tests: </strong>{{ log.tests.r_summary }}</p> 
+  {% for testform in testforms %}
+    {{ testform }}
+  {% endfor %}
   <div style="margin-left:20px;margin-top:20px">
     <h4>Logs</h4>
-
-    {% for log in board.log_set.all %}
+    {% for log in board_logs %}
       <hr>
       <p> Log id: <a href="{{ log.get_absolute_url }}">{{ log.id }}</a> : {{ log.text }} </p>
     {% endfor %}

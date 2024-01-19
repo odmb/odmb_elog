@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 {% block content %}
   <h1>Logs</h1>
-  <button onclick="location.href='{% url 'log-create' %}'" type="button">Create new log</button>
+  <button onclick="location.href='{% url 'boardtest-create' %}'" type="button">Create new log</button>
   <h2>Filter logs</h2>
   {% if log_list %}
   {% crispy filter.form filter.form.helper %}
