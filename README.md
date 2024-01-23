@@ -14,7 +14,7 @@ Commands to start server
 python3 manage.py runserver
 ```
 
-Connect to the below websites
+Connect to the below websites  
 localhost:8000  
 localhost:8000/admin   
 
