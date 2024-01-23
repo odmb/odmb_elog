@@ -18,4 +18,4 @@ Connect to the below websites
 localhost:8000  
 localhost:8000/admin   
 
-Use admin site to create baord types and baord locations.
+Use admin site to create board types and board locations.
