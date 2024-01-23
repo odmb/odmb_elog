@@ -1,5 +1,6 @@
 Commands to setup website
 ```
+git clone git@github.com:odmb/odmb_elog.git
 source set_env.sh
 python3 manage.py migrate --run-syncd
 python3 manage.py makemigrations
