@@ -149,25 +149,294 @@ class Tests(models.Model):
   picture_back = models.ImageField(null=True, blank=True)
   picture_summary = models.IntegerField(null=True, blank=True)
   picture_summary_log_id = models.IntegerField(null=True, blank=True)
+
+  ##Short circuit test##
+  #All resistance measurements for the regulators
   r_point0 = models.FloatField(null=True, blank=True)
   r_point1 = models.FloatField(null=True, blank=True)
   r_point2 = models.FloatField(null=True, blank=True)
   r_point3 = models.FloatField(null=True, blank=True)
   r_point4 = models.FloatField(null=True, blank=True)
+  r_point5 = models.FloatField(null=True, blank=True)
+  r_point6 = models.FloatField(null=True, blank=True)
+  r_point7 = models.FloatField(null=True, blank=True)
+  r_point8 = models.FloatField(null=True, blank=True)
+  r_point9 = models.FloatField(null=True, blank=True)
+  r_point10= models.FloatField(null=True, blank=True)
+  r_point11= models.FloatField(null=True, blank=True)
+  r_point12= models.FloatField(null=True, blank=True)
+  r_point13= models.FloatField(null=True, blank=True)
+  r_point14= models.FloatField(null=True, blank=True)
+  r_point15= models.FloatField(null=True, blank=True)
+  r_point16= models.FloatField(null=True, blank=True)
+
+  #Resistance values for the power supply 
+  r_point17= models.FloatField(null=True, blank=True)
+  r_point18= models.FloatField(null=True, blank=True)
+  r_point19= models.FloatField(null=True, blank=True)
+
+  #Checkbox for if fuses pass resistance requirement
+  r_fuses = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
   r_summary = models.IntegerField(null=True, blank=True)
   r_summary_log_id = models.IntegerField(null=True, blank=True)
+  ####################################################
+
+  ##Power test on the bench
+  #Measurements of each voltage regulator
   v_point0 = models.FloatField(null=True, blank=True)
   v_point1 = models.FloatField(null=True, blank=True)
   v_point2 = models.FloatField(null=True, blank=True)
   v_point3 = models.FloatField(null=True, blank=True)
   v_point4 = models.FloatField(null=True, blank=True)
+  v_point5 = models.FloatField(null=True, blank=True)
+  v_point6 = models.FloatField(null=True, blank=True)
+  v_point7 = models.FloatField(null=True, blank=True)
+  v_point8 = models.FloatField(null=True, blank=True)
+  v_point9 = models.FloatField(null=True, blank=True)
+  v_point10= models.FloatField(null=True, blank=True)
+  v_point11= models.FloatField(null=True, blank=True)
+  v_point12= models.FloatField(null=True, blank=True)
+  v_point13= models.FloatField(null=True, blank=True)
+  v_point14= models.FloatField(null=True, blank=True)
+  v_point15= models.FloatField(null=True, blank=True)
+  v_point16= models.FloatField(null=True, blank=True)
+
+  #Resistance values for the power supply 
+  v_point17= models.FloatField(null=True, blank=True)
+  v_point18= models.FloatField(null=True, blank=True)
+  v_point19= models.FloatField(null=True, blank=True)
+
+  #Summary checkbox
   v_summary = models.IntegerField(null=True, blank=True)
   v_summary_log_id = models.IntegerField(null=True, blank=True)
+  ###################################################
+
+  ##LEDs for clock configuration test
+  #Various LEDs on front panel
   led_0 = models.BooleanField(null=True, blank=True)
   led_1 = models.BooleanField(null=True, blank=True)
   led_2 = models.BooleanField(null=True, blank=True)
+  led_3 = models.BooleanField(null=True, blank=True)
+  led_4 = models.BooleanField(null=True, blank=True)
+  led_5 = models.BooleanField(null=True, blank=True)
+  led_6 = models.BooleanField(null=True, blank=True)
+  led_7 = models.BooleanField(null=True, blank=True)
+  led_8 = models.BooleanField(null=True, blank=True)
+  led_9 = models.BooleanField(null=True, blank=True)
+  led_10= models.BooleanField(null=True, blank=True)
+  led_11= models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
   led_summary = models.IntegerField(null=True, blank=True)
   led_summary_log_id = models.IntegerField(null=True, blank=True)
+  ##################################################
+
+  ##FPGA & EEPROM Programming Test
+  #Various requirements for the EEPROM programming test
+  eeprom_programmed = models.BooleanField(null=True, blank=True)
+  eeprom_done_led = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  eeprom_summary = models.IntegerField(null=True, blank=True)
+  eeprom_summary_log_id = models.IntegerField(null=True, blank=True)
+
+  ##Basic VME tests 
+  #Checkboxes for basic VME test
+  vme_done_led = models.BooleanField(null=True, blank=True)
+  vme_basic_communication = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  vme_summary = models.IntegerField(null=True, blank=True)
+  vme_summary_log_id = models.IntegerField(null=True, blank=True)
+  #################################################
+
+  ##FPGA Clock test
+  #Summary checkbox
+  fpgaclk_summary = models.IntegerField(null=True, blank=True)
+  fpgaclk_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+  ##System monitor test
+  #Sysmon currents
+  sysmon_current0 = models.FloatField(null=True, blank=True)
+  sysmon_current1 = models.FloatField(null=True, blank=True)
+  sysmon_current2 = models.FloatField(null=True, blank=True)
+  sysmon_current3 = models.FloatField(null=True, blank=True)
+  sysmon_current4 = models.FloatField(null=True, blank=True)
+  sysmon_current5 = models.FloatField(null=True, blank=True)
+  sysmon_current6 = models.FloatField(null=True, blank=True)
+  sysmon_current7 = models.FloatField(null=True, blank=True)
+  sysmon_current8 = models.FloatField(null=True, blank=True)
+  sysmon_current9 = models.FloatField(null=True, blank=True)
+  sysmon_current10= models.FloatField(null=True, blank=True)
+  sysmon_current11= models.FloatField(null=True, blank=True)
+  sysmon_current12= models.FloatField(null=True, blank=True)
+  sysmon_current13= models.FloatField(null=True, blank=True)
+  sysmon_current14= models.FloatField(null=True, blank=True)
+
+
+  #Sysmon voltages
+  sysmon_voltage0 = models.FloatField(null=True, blank=True)
+  sysmon_voltage1 = models.FloatField(null=True, blank=True)
+  sysmon_voltage2 = models.FloatField(null=True, blank=True)
+  sysmon_voltage3 = models.FloatField(null=True, blank=True)
+  sysmon_voltage4 = models.FloatField(null=True, blank=True)
+  sysmon_voltage5 = models.FloatField(null=True, blank=True)
+  sysmon_voltage6 = models.FloatField(null=True, blank=True)
+  sysmon_voltage7 = models.FloatField(null=True, blank=True)
+  sysmon_voltage8 = models.FloatField(null=True, blank=True)
+  sysmon_voltage9 = models.FloatField(null=True, blank=True)
+  sysmon_voltage10= models.FloatField(null=True, blank=True)
+  sysmon_voltage11= models.FloatField(null=True, blank=True)
+  sysmon_voltage12= models.FloatField(null=True, blank=True)
+  sysmon_voltage13= models.FloatField(null=True, blank=True)
+  sysmon_voltage14= models.FloatField(null=True, blank=True)
+  sysmon_voltage15= models.FloatField(null=True, blank=True)
+  sysmon_voltage16= models.FloatField(null=True, blank=True)
+  sysmon_voltage17= models.FloatField(null=True, blank=True)
+  sysmon_voltage18= models.FloatField(null=True, blank=True)
+  sysmon_voltage19= models.FloatField(null=True, blank=True)
+  sysmon_voltage20= models.FloatField(null=True, blank=True)
+  sysmon_voltage21= models.FloatField(null=True, blank=True)
+  sysmon_voltage22= models.FloatField(null=True, blank=True)
+  sysmon_voltage23= models.FloatField(null=True, blank=True)
+  sysmon_voltage24= models.FloatField(null=True, blank=True)
+  sysmon_voltage25= models.FloatField(null=True, blank=True)
+  sysmon_voltage26= models.FloatField(null=True, blank=True)
+  sysmon_voltage27= models.FloatField(null=True, blank=True)
+  sysmon_voltage28= models.FloatField(null=True, blank=True)
+  sysmon_voltage29= models.FloatField(null=True, blank=True)
+  sysmon_voltage30= models.FloatField(null=True, blank=True)
+  sysmon_voltage31= models.FloatField(null=True, blank=True)
+  sysmon_voltage32= models.FloatField(null=True, blank=True)
+  sysmon_voltage33= models.FloatField(null=True, blank=True)
+  sysmon_voltage34= models.FloatField(null=True, blank=True)
+  sysmon_voltage35= models.FloatField(null=True, blank=True)
+  sysmon_voltage36= models.FloatField(null=True, blank=True)
+  sysmon_voltage37= models.FloatField(null=True, blank=True)
+
+  #Summary checkbox
+  sysmon_summary = models.IntegerField(null=True, blank=True)
+  sysmon_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+  ##PROM test
+  #Summary checkbox
+  prom_summary = models.IntegerField(null=True, blank=True)
+  prom_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+  ##CCB test
+  #Summary checkbox
+  ccb_summary = models.IntegerField(null=True, blank=True)
+  ccb_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+
+  ##OTMB test
+  #Summary checkbox
+  otmb_summary = models.IntegerField(null=True, blank=True)
+  otmb_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+
+  ##LVMB test
+  #Checkboxes if ADCs have passed voltage test
+  lvmb_adc_0 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_1 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_2 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_3 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_4 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_5 = models.BooleanField(null=True, blank=True)
+  lvmb_adc_6 = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  lvmb_summary = models.IntegerField(null=True, blank=True)
+  lvmb_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+
+  ##DCFEB JTAG test
+  dcfebjtag_0_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_1_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_2_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_3_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_4_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_5_connected = models.BooleanField(null=True, blank=True)
+  dcfebjtag_6_connected = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  dcfebjtag_summary = models.IntegerField(null=True, blank=True)
+  dcfebjtag_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+
+  ##DCFEB fast signal test
+  #INJPLS, EXTPLS, BC0, L1A, L1A_MATCH values
+  dcfebfastsignal_signal0 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal1 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal2 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal3 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal4 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal5 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal6 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal7 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal8 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal9 = models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal10= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal11= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal12= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal13= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal14= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal15= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal16= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal17= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal18= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal19= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal20= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal21= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal22= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal23= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal24= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal25= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal26= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal27= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal28= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal29= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal30= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal31= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal32= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal33= models.FloatField(null=True, blank=True)
+  dcfebfastsignal_signal34= models.FloatField(null=True, blank=True)
+
+  #Summary checkbox
+  dcfebfastsignal_summary = models.IntegerField(null=True, blank=True)
+  dcfebfastsignal_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+
+
+  ##Optical PRBS test
+  #Checkboxes if Tx12, Rx12, B04, and SPY link have passed optical loopback test
+  opticalprbs_0_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_1_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_2_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_3_pass = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  opticalprbs_summary = models.IntegerField(null=True, blank=True)
+  opticalprbs_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
 
   def __str__(self):
     """String for representing Model object."""

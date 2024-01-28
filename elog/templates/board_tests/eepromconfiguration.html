@@ -1,0 +1,15 @@
+<div>
+<b>EEPROM configuration</b>: Load firmware on FPGA EEPROM.
+{{ form.non_field_errors }}
+{% for field in form %}
+{% if "logurl" not in field.id_for_label %}
+<div>
+  {{ field.label_tag }} {{ field }}
+  {{ field.errors }}
+</div>
+{% elif field.value != None %}
+<div>Link to log: <a href="{{ field.value }}">{{ field.value }}</a></div>
+{% endif %}
+{% endfor %}
+<p></p>
+</div>

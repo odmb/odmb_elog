@@ -1,0 +1,15 @@
+<div>
+<b>DCFEB JTAG test</b>: Checks communication between the ODMB7/5 and the xDCFEBs through the skew-clear cables (connected to PPIB for the ODMB7).  
+{{ form.non_field_errors }}
+{% for field in form %}
+{% if "logurl" not in field.id_for_label %}
+<div>
+  {{ field.label_tag }} {{ field }}
+  {{ field.errors }}
+</div>
+{% elif field.value != None %}
+<div>Link to log: <a href="{{ field.value }}">{{ field.value }}</a></div>
+{% endif %}
+{% endfor %}
+<p></p>
+</div>
