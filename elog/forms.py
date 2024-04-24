@@ -109,7 +109,7 @@ class ShortCircuitForm(forms.Form):
     super().__init__(*args, **kwargs)
     resistance_labels =["3.6V PPIB (ODMB7)","0.95V core","1.2V MGT","1.0V MGT","2.5V CLK","3.3V OPTICAL","3.3V","VCCO Bank 0 & 65","1.8V VCCO","1.8V MGT","1.8V AUX","1.8V",
                         "1.8V CLK","3.3V CLK","1.5V supply","3.3V supply","5V supply","F21 3.3V fuse","F22 5V fuse","F23 1A fuse","F24 1A fuse"]
-    for ipoint in range(22):
+    for ipoint in range(21):
       self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(resistance_labels[ipoint] + f' resistance (ohm)'), required=False)
     #self.fields[f'r_summary'] = forms.BooleanField(label=f'Pass test', required=False)
     self.fields[f'r_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
