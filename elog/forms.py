@@ -107,8 +107,10 @@ class ShortCircuitForm(forms.Form):
   template_name = "board_tests/shortcircuitform.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    for ipoint in range(19):
-      self.fields[f'r_point{ipoint}'] = forms.FloatField(label=f'Point {ipoint} resistance (ohm)', required=False)
+    resistance_labels =["3.6V PPIB (ODMB7)","0.95V core","1.2V MGT","1.0V MGT","2.5V CLK","3.3V OPTICAL","3.3V","VCCO Bank 0 & 65","1.8V VCCO","1.8V MGT","1.8V AUX","1.8V",
+                        "1.8V CLK","3.3V CLK","1.5V supply","3.3V supply","5V supply","F21 3.3V fuse","F22 5V fuse","F23 1A fuse","F24 1A fuse"]
+    for ipoint in range(22):
+      self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(resistance_labels[ipoint] + f' resistance (ohm)'), required=False)
     #self.fields[f'r_summary'] = forms.BooleanField(label=f'Pass test', required=False)
     self.fields[f'r_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'r_logurl'] = forms.URLField(label=f'URL', required=False)
@@ -134,10 +136,11 @@ class PowerForm(forms.Form):
   template_name = "board_tests/powerform.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    for ipoint in range(19):
-      self.fields[f'v_point{ipoint}'] = forms.FloatField(label=f'Point {ipoint} voltage (V)', required=False)
-    self.fields[f'v_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
-    self.fields[f'v_logurl'] = forms.URLField(label=f'URL', required=False)
+    power_supply_labels = ["1.5V power supply", "3.3V power supply", "5V power supply"]
+    for ipoint in range(3):
+      self.fields[f'a_point{ipoint}'] = forms.FloatField(label=(power_supply_labels[ipoint] + f' current (A)'), required=False)
+    self.fields[f'a_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'a_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
@@ -157,7 +160,7 @@ class ClockConfigurationForm(forms.Form):
   template_name = "board_tests/clockconfiguration.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    for ipoint in range(11):
+    for ipoint in range(12):
       self.fields[f'led_{ipoint}'] = forms.BooleanField(label=f'LED {ipoint}', required=False)
     self.fields[f'led_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'led_logurl'] = forms.URLField(label=f'URL', required=False)
@@ -248,18 +251,29 @@ class SysmonTestForm(forms.Form):
   template_name = "board_tests/sysmontest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
+
+    #Labels corresponding to what is being recorded in each field
     current_labels = ["current_5v","current_3v3","current_3v3_reg_op","current_3v3_reg_clk","current_3v6_pp","current_2v5_fc","current_1v2_mgt","current_1v0_mgt","current_0v95","current_3v3_unreg",
                       "current_1v8","current_1v8_aux","current_1v8_mgt","current_1v8_vcco","current_vcco_0_65","current_1v8_reg_clk"]
+    
+    #Labels corresponding to what is being recorded in each field
     voltage_labels = ["voltage_5v","voltage_5v_lvmb","voltage_3v3","voltage_vphy_3v3","voltage_vpll_3v3","voltage_3v3_reg_op","voltage_3v3_reg_clk","voltage_3v3_clk","voltage_3v3_rx12_1","voltage_3v3_rx12_10",
                       "voltage_3v3_tx12_1","voltage_3v3_tx12_10","voltage_3v3_b04_tx","voltage_3v3_b04_rx","voltage_3v3_spy_vcct","voltage_3v3_spy_vccr","voltage_3v3_pp_fuse","voltage_3v3_pp","voltage_2v5_fc",
                       "voltage_2v5","voltage_2v5_clk_0","voltage_1v2_mgt","voltage_1v0_mgt","voltage_0v95","voltage_3v3_unreg","voltage_1v8","voltage_1v8_aux","voltage_1v8_mgt","voltage_1v8_vcco",
                       "voltage_vcco_0_65","voltage_therm1","voltage_1v8_reg_clk","voltage_1v8_clk_l1","voltage_1v8_clk_l2","voltage_1v8_clk_l3","voltage_1v8_clk_io","voltage_1v8_clk_o","voltage_vref_gtlp"]
-    for ipoint in range(14):
+
+    #Adds fields for each current value to measure
+    for ipoint in range(16):
       self.fields[f'sysmon_current{ipoint}'] = forms.FloatField(label=(current_labels[ipoint] + f' sysmon current pin (pin {ipoint})'), required=False)
+    
+    #Adds fields for each voltage value to measure
     for ipoint in range(37):
       self.fields[f'sysmon_voltage{ipoint}'] = forms.FloatField(label=(voltage_labels[ipoint] + f' sysmon voltage pin (pin {ipoint})'), required=False)
+
+    #Summary button
     self.fields[f'sysmon_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'sysmon_logurl'] = forms.URLField(label=f'URL', required=False)
+
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
@@ -417,7 +431,6 @@ class OpticalPRBSTestForm(forms.Form):
     self.fields[f'opticalprbs_0_pass'] = forms.BooleanField(label=f'TX12/RX12 loopback is successful', required=False)
     self.fields[f'opticalprbs_1_pass'] = forms.BooleanField(label=f'B04 loopback is successful', required=False)
     self.fields[f'opticalprbs_2_pass'] = forms.BooleanField(label=f'SPY is successful', required=False)
-    self.fields[f'opticalprbs_3_pass'] = forms.BooleanField(label=f'RX12/B04 loopback is successful (ODMB5)', required=False)
     self.fields[f'opticalprbs_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'opticalprbs_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):

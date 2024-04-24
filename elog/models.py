@@ -166,17 +166,17 @@ class Tests(models.Model):
   r_point11= models.FloatField(null=True, blank=True)
   r_point12= models.FloatField(null=True, blank=True)
   r_point13= models.FloatField(null=True, blank=True)
+
+  #Resistance values for the power supply 
   r_point14= models.FloatField(null=True, blank=True)
   r_point15= models.FloatField(null=True, blank=True)
   r_point16= models.FloatField(null=True, blank=True)
 
-  #Resistance values for the power supply 
+  #Checkbox for if fuses pass resistance requirement
   r_point17= models.FloatField(null=True, blank=True)
   r_point18= models.FloatField(null=True, blank=True)
   r_point19= models.FloatField(null=True, blank=True)
-
-  #Checkbox for if fuses pass resistance requirement
-  r_fuses = models.BooleanField(null=True, blank=True)
+  r_point20= models.FloatField(null=True, blank=True)
 
   #Summary checkbox
   r_summary = models.IntegerField(null=True, blank=True)
@@ -185,33 +185,15 @@ class Tests(models.Model):
 
   ##Power test on the bench
   #Measurements of each voltage regulator
-  v_point0 = models.FloatField(null=True, blank=True)
-  v_point1 = models.FloatField(null=True, blank=True)
-  v_point2 = models.FloatField(null=True, blank=True)
-  v_point3 = models.FloatField(null=True, blank=True)
-  v_point4 = models.FloatField(null=True, blank=True)
-  v_point5 = models.FloatField(null=True, blank=True)
-  v_point6 = models.FloatField(null=True, blank=True)
-  v_point7 = models.FloatField(null=True, blank=True)
-  v_point8 = models.FloatField(null=True, blank=True)
-  v_point9 = models.FloatField(null=True, blank=True)
-  v_point10= models.FloatField(null=True, blank=True)
-  v_point11= models.FloatField(null=True, blank=True)
-  v_point12= models.FloatField(null=True, blank=True)
-  v_point13= models.FloatField(null=True, blank=True)
-  v_point14= models.FloatField(null=True, blank=True)
-  v_point15= models.FloatField(null=True, blank=True)
-  v_point16= models.FloatField(null=True, blank=True)
-
-  #Resistance values for the power supply 
-  v_point17= models.FloatField(null=True, blank=True)
-  v_point18= models.FloatField(null=True, blank=True)
-  v_point19= models.FloatField(null=True, blank=True)
-
+  a_point0 = models.FloatField(null=True, blank=True)
+  a_point1 = models.FloatField(null=True, blank=True)
+  a_point2 = models.FloatField(null=True, blank=True)
+ 
   #Summary checkbox
-  v_summary = models.IntegerField(null=True, blank=True)
-  v_summary_log_id = models.IntegerField(null=True, blank=True)
+  a_summary = models.IntegerField(null=True, blank=True)
+  a_summary_log_id = models.IntegerField(null=True, blank=True)
   ###################################################
+
 
   ##LEDs for clock configuration test
   #Various LEDs on front panel
@@ -276,6 +258,8 @@ class Tests(models.Model):
   sysmon_current12= models.FloatField(null=True, blank=True)
   sysmon_current13= models.FloatField(null=True, blank=True)
   sysmon_current14= models.FloatField(null=True, blank=True)
+  sysmon_current15= models.FloatField(null=True, blank=True)
+  sysmon_current16= models.FloatField(null=True, blank=True)
 
 
   #Sysmon voltages
@@ -430,7 +414,6 @@ class Tests(models.Model):
   opticalprbs_0_pass = models.BooleanField(null=True, blank=True)
   opticalprbs_1_pass = models.BooleanField(null=True, blank=True)
   opticalprbs_2_pass = models.BooleanField(null=True, blank=True)
-  opticalprbs_3_pass = models.BooleanField(null=True, blank=True)
 
   #Summary checkbox
   opticalprbs_summary = models.IntegerField(null=True, blank=True)
