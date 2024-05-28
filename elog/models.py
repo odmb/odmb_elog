@@ -301,7 +301,7 @@ class Tests(models.Model):
   sysmon_voltage35= models.FloatField(null=True, blank=True)
   sysmon_voltage36= models.FloatField(null=True, blank=True)
   sysmon_voltage37= models.FloatField(null=True, blank=True)
-  sysmon_voltage38= models.FloatField(null=True, blank=True)
+  #sysmon_voltage38= models.FloatField(null=True, blank=True)
 
   #Summary checkbox
   sysmon_summary = models.IntegerField(null=True, blank=True)

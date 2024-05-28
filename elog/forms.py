@@ -259,7 +259,7 @@ class SysmonTestForm(forms.Form):
     #Labels corresponding to what is being recorded in each field
     voltage_labels = ["voltage_5v","voltage_5v_lvmb","voltage_3v3","voltage_vphy_3v3","voltage_vpll_3v3","voltage_3v3_reg_op","voltage_3v3_reg_clk","voltage_3v3_clk","voltage_3v3_rx12_1","voltage_3v3_rx12_10",
                       "voltage_3v3_tx12_1","voltage_3v3_tx12_10","voltage_3v3_b04_tx","voltage_3v3_b04_rx","voltage_3v3_spy_vcct","voltage_3v3_spy_vccr","voltage_3v3_pp_fuse","voltage_3v3_pp","voltage_2v5_fc",
-                      "voltage_2v5","voltage_2v5_clk_0","voltage_1v2_mgt","voltage_1v0_mgt","voltage_0v95","voltage_3v3_unreg","voltage_1v8","voltage_1v8_aux","voltage_1v8_mgt","voltage_1v8_vcco","repeat_1v8",
+                      "voltage_2v5","voltage_2v5_clk_0","voltage_1v2_mgt","voltage_1v0_mgt","voltage_0v95","voltage_3v3_unreg","voltage_1v8","voltage_1v8_aux","voltage_1v8_mgt","voltage_1v8_vcco",
                       "voltage_vcco_0_65","voltage_therm1","voltage_1v8_reg_clk","voltage_1v8_clk_l1","voltage_1v8_clk_l2","voltage_1v8_clk_l3","voltage_1v8_clk_io","voltage_1v8_clk_o",
                       "voltage_vref_gtlp"]
     
