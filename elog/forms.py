@@ -360,7 +360,7 @@ class LVMBTestForm(forms.Form):
   template_name = "board_tests/lvmbtest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    for ipoint in range(6):
+    for ipoint in range(7):
       self.fields[f'lvmb_adc_{ipoint}'] = forms.BooleanField(label=f'LVMB ADC{ipoint} passes', required=False)
     self.fields[f'lvmb_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'lvmb_logurl'] = forms.URLField(label=f'URL', required=False)
@@ -383,7 +383,7 @@ class DCFEBJTAGTestForm(forms.Form):
   template_name = "board_tests/dcfebjtagtest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    for ipoint in range(6):
+    for ipoint in range(7):
       self.fields[f'dcfebjtag_{ipoint}_connected'] = forms.BooleanField(label=f'xDCFEB{ipoint} passes', required=False)
     self.fields[f'dcfebjtag_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'dcfebjtag_logurl'] = forms.URLField(label=f'URL', required=False)
@@ -408,7 +408,7 @@ class DCFEBFastSignalTestForm(forms.Form):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     labels_signal = ["INJPLS","EXTPLS","BC0","L1A","L1A_MATCH"]
-    for ipoint in range(34):
+    for ipoint in range(35):
       label_temp = "xDCFEB" + str(ipoint//5) + " " + labels_signal[ipoint%5] +  " succesfully sent"
       self.fields[f'dcfebfastsignal_signal{ipoint}'] = forms.FloatField(label=label_temp, required=False)
     self.fields[f'dcfebfastsignal_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
@@ -432,9 +432,12 @@ class OpticalPRBSTestForm(forms.Form):
   template_name = "board_tests/opticalprbstest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'opticalprbs_0_pass'] = forms.BooleanField(label=f'TX12/RX12 loopback is successful', required=False)
-    self.fields[f'opticalprbs_1_pass'] = forms.BooleanField(label=f'B04 loopback is successful', required=False)
-    self.fields[f'opticalprbs_2_pass'] = forms.BooleanField(label=f'SPY is successful', required=False)
+    self.fields[f'opticalprbs_0_pass'] = forms.BooleanField(label=f'B04 Rx links 2-4 test', required=False)
+    self.fields[f'opticalprbs_1_pass'] = forms.BooleanField(label=f'B04 Tx all 4 links test', required=False)
+    self.fields[f'opticalprbs_2_pass'] = forms.BooleanField(label=f'R12 all 12 links', required=False)
+    self.fields[f'opticalprbs_3_pass'] = forms.BooleanField(label=f'T12 all 12 links', required=False)
+    self.fields[f'opticalprbs_4_pass'] = forms.BooleanField(label=f'B04 Rx link 1', required=False)
+    self.fields[f'opticalprbs_5_pass'] = forms.BooleanField(label=f'SPY loopback test', required=False)
     self.fields[f'opticalprbs_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'opticalprbs_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):

@@ -415,6 +415,9 @@ class Tests(models.Model):
   opticalprbs_0_pass = models.BooleanField(null=True, blank=True)
   opticalprbs_1_pass = models.BooleanField(null=True, blank=True)
   opticalprbs_2_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_3_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_4_pass = models.BooleanField(null=True, blank=True)
+  opticalprbs_5_pass = models.BooleanField(null=True, blank=True)
 
   #Summary checkbox
   opticalprbs_summary = models.IntegerField(null=True, blank=True)
