@@ -149,6 +149,8 @@ class Tests(models.Model):
   picture_back = models.ImageField(null=True, blank=True)
   picture_summary = models.IntegerField(null=True, blank=True)
   picture_summary_log_id = models.IntegerField(null=True, blank=True)
+  picture_compunetix_id_num = models.CharField(max_length=20, null=True, blank=True)
+
 
   ##Short circuit test##
   #All resistance measurements for the regulators
@@ -219,6 +221,9 @@ class Tests(models.Model):
   #Various requirements for the EEPROM programming test
   eeprom_programmed = models.BooleanField(null=True, blank=True)
   eeprom_done_led = models.BooleanField(null=True, blank=True)
+  eeprom_5V_current = models.FloatField(null=True, blank=True)
+  eeprom_3p3V_current = models.FloatField(null=True, blank=True)
+  eeprom_1p5V_current = models.FloatField(null=True, blank=True)
 
   #Summary checkbox
   eeprom_summary = models.IntegerField(null=True, blank=True)

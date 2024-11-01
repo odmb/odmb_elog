@@ -100,6 +100,7 @@ class VisualInspectionsForm(forms.Form):
     super().__init__(*args, **kwargs)
     self.fields['picture_front'] = forms.ImageField(label='Front picture', required=False)
     self.fields['picture_back'] = forms.ImageField(label='Back picture', required=False)
+    self.fields['picture_compunetix_id_num'] = forms.CharField(label='Compunetix label for ODMB7/5 board (ex. WVVHC-004)', required=False)
     self.fields['picture_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'picture_logurl'] = forms.URLField(label=f'URL', required=False)
 
@@ -107,10 +108,12 @@ class ShortCircuitForm(forms.Form):
   template_name = "board_tests/shortcircuitform.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    resistance_labels =["3.6V PPIB (ODMB7)","0.95V core","1.2V MGT","1.0V MGT","2.5V CLK","3.3V OPTICAL","3.3V","VCCO Bank 0 & 65","1.8V VCCO","1.8V MGT","1.8V AUX","1.8V",
-                        "1.8V CLK","3.3V CLK","1.5V supply","3.3V supply","5V supply","F21 3.3V fuse","F22 5V fuse","F23 1A fuse","F24 1A fuse"]
+    resistance_labels =["3.6V PPIB (ODMB7, exp. ~320 Ohm)","0.95V core (exp. ~10 Ohm)","1.2V MGT (exp. ~95 Ohm)","1.0V MGT (exp. ~60 Ohm)","2.5V CLK (exp. ~825 Ohm)","3.3V OPTICAL (exp. ~1750 Ohm)",
+                        "3.3V (exp. ~310 Ohm)","VCCO Bank 0 & 65 (exp. ~125 Ohm)","1.8V VCCO (exp. ~125 Ohm)","1.8V MGT (exp. ~135 Ohm)","1.8V AUX (exp. ~130 Ohm)","1.8V (exp. ~130 Ohm)",
+                        "1.8V CLK (exp. ~615 Ohm)","3.3V CLK (exp. ~615 Ohm)","1.5V supply (exp. ~8760 Ohm)","3.3V supply (exp. ~3600 Ohm)","5V supply (exp. ~2300 Ohm)","F21 5V fuse",
+                        "F22 3.3V fuse","F23 1A fuse","F24 1A fuse"]
     for ipoint in range(21):
-      self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(resistance_labels[ipoint] + f' resistance (ohm)'), required=False)
+      self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(f'Resistance of ' + resistance_labels[ipoint]), required=False)
     #self.fields[f'r_summary'] = forms.BooleanField(label=f'Pass test', required=False)
     self.fields[f'r_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'r_logurl'] = forms.URLField(label=f'URL', required=False)
@@ -185,6 +188,9 @@ class EEPROMConfigurationForm(forms.Form):
     super().__init__(*args, **kwargs)
     self.fields[f'eeprom_programmed'] = forms.BooleanField(label=f'EEPROM has been programmed', required=False)
     self.fields[f'eeprom_done_led'] = forms.BooleanField(label=f'Done LED is lit', required=False)
+    self.fields[f'eeprom_5V_current'] = forms.FloatField(label=('Current for 5V supply (expect ~2.9A)'), required=False)
+    self.fields[f'eeprom_3p3V_current'] = forms.FloatField(label=('Current for 3.3V supply (expect ~2.1A)'), required=False)
+    self.fields[f'eeprom_1p5V_current'] = forms.FloatField(label=('Current for 1.5V supply (expect ~0A)'), required=False)
     self.fields[f'eeprom_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'eeprom_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
@@ -432,12 +438,12 @@ class OpticalPRBSTestForm(forms.Form):
   template_name = "board_tests/opticalprbstest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'opticalprbs_0_pass'] = forms.BooleanField(label=f'B04 Rx links 2-4 test', required=False)
-    self.fields[f'opticalprbs_1_pass'] = forms.BooleanField(label=f'B04 Tx all 4 links test', required=False)
-    self.fields[f'opticalprbs_2_pass'] = forms.BooleanField(label=f'R12 all 12 links', required=False)
-    self.fields[f'opticalprbs_3_pass'] = forms.BooleanField(label=f'T12 all 12 links', required=False)
-    self.fields[f'opticalprbs_4_pass'] = forms.BooleanField(label=f'B04 Rx link 1', required=False)
-    self.fields[f'opticalprbs_5_pass'] = forms.BooleanField(label=f'SPY loopback test', required=False)
+    self.fields[f'opticalprbs_0_pass'] = forms.BooleanField(label=f'Test of B04 Rx - links 1-3', required=False)
+    self.fields[f'opticalprbs_1_pass'] = forms.BooleanField(label=f'Test of B04 Tx - all 4 links', required=False)
+    self.fields[f'opticalprbs_2_pass'] = forms.BooleanField(label=f'Test of R12 - all 12 links', required=False)
+    self.fields[f'opticalprbs_3_pass'] = forms.BooleanField(label=f'Test of T12 - all 12 links', required=False)
+    self.fields[f'opticalprbs_4_pass'] = forms.BooleanField(label=f'Test of SPY Tx', required=False)
+    self.fields[f'opticalprbs_5_pass'] = forms.BooleanField(label=f'Test of SPY Rx', required=False)
     self.fields[f'opticalprbs_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
     self.fields[f'opticalprbs_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):

@@ -1,5 +1,9 @@
 #!/bin/bash
 daemon(){
+
+#This path is specific to this directory. This is true for the pushed code. 
+#This should not be an issue in general unless we move the database. I (Anders) will try to fix this. Just unsure of the best path forward.
+#Need to use base folder of the project
 ODMB75_DB_PATH="/data/odmb75_database/odmb_elog"
 
 echo "Set environment for database"
@@ -20,8 +24,6 @@ echo "Add PID to /var/run/run_odmb75_database.pid"
 PID=$!
 echo $PID > /var/run/run_odmb75_database.pid
 
-now=$(date "+%m_%d_%y__%H_%M_%S")
-"$@" > /data/odmb75_database/odmb_elog/logs_daemon/odmb75_${now}_daemon_output.txt
 }
 
 
@@ -35,3 +37,7 @@ restart(){
 stop
 start
 }
+
+now=$(date "+%m_%d_%y__%H_%M_%S")
+"$@" > /data/odmb75_database/odmb_elog/logs_daemon/odmb75_${now}_daemon_output.txt
+
