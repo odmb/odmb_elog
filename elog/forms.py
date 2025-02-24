@@ -108,9 +108,9 @@ class ShortCircuitForm(forms.Form):
   template_name = "board_tests/shortcircuitform.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    resistance_labels =["3.6V PPIB (ODMB7, exp. ~320 Ohm)","0.95V core (exp. ~10 Ohm)","1.2V MGT (exp. ~95 Ohm)","1.0V MGT (exp. ~60 Ohm)","2.5V CLK (exp. ~825 Ohm)","3.3V OPTICAL (exp. ~1750 Ohm)",
+    resistance_labels =["3.6V PPIB (ODMB7, exp. ~320 Ohm)","0.95V core (exp. ~10 Ohm)","1.2V MGT (exp. ~95 Ohm)","1.0V MGT (exp. ~60 Ohm)","2.5V CLK (exp. ~1850 Ohm)","3.3V OPTICAL (exp. ~1750 Ohm)",
                         "3.3V (exp. ~310 Ohm)","VCCO Bank 0 & 65 (exp. ~125 Ohm)","1.8V VCCO (exp. ~125 Ohm)","1.8V MGT (exp. ~135 Ohm)","1.8V AUX (exp. ~130 Ohm)","1.8V (exp. ~130 Ohm)",
-                        "1.8V CLK (exp. ~615 Ohm)","3.3V CLK (exp. ~615 Ohm)","1.5V supply (exp. ~8760 Ohm)","3.3V supply (exp. ~3600 Ohm)","5V supply (exp. ~2300 Ohm)","F21 5V fuse",
+                        "1.8V CLK (exp. ~2200 Ohm)","3.3V CLK (exp. ~3100 Ohm)","1.5V supply (exp. ~8760 Ohm)","3.3V supply (exp. ~3600 Ohm)","5V supply (exp. ~2300 Ohm)","F21 5V fuse",
                         "F22 3.3V fuse","F23 1A fuse","F24 1A fuse"]
     for ipoint in range(21):
       self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(f'Resistance of ' + resistance_labels[ipoint]), required=False)
