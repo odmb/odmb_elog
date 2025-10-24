@@ -151,7 +151,6 @@ class Tests(models.Model):
   picture_summary_log_id = models.IntegerField(null=True, blank=True)
   picture_compunetix_id_num = models.CharField(max_length=20, null=True, blank=True)
 
-
   ##Short circuit test##
   #All resistance measurements for the regulators
   r_point0 = models.FloatField(null=True, blank=True)
@@ -228,7 +227,16 @@ class Tests(models.Model):
   #Summary checkbox
   eeprom_summary = models.IntegerField(null=True, blank=True)
   eeprom_summary_log_id = models.IntegerField(null=True, blank=True)
-
+  
+  ##Jitter analysis
+  #TIE measurement
+  jitter_picture = models.ImageField(null=True, blank=True)
+  jitter_log = models.FloatField(null=True, blank=True)
+  
+  #Summary checkbox
+  jitter_summary = models.IntegerField(null=True, blank=True)
+  jitter_summary_log_id = models.IntegerField(null=True, blank=True)
+  
   ##Basic VME tests 
   #Checkboxes for basic VME test
   vme_done_led = models.BooleanField(null=True, blank=True)

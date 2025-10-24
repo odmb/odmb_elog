@@ -108,10 +108,10 @@ class ShortCircuitForm(forms.Form):
   template_name = "board_tests/shortcircuitform.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    resistance_labels =["3.6V PPIB (ODMB7, exp. ~320 Ohm)","0.95V core (exp. ~10 Ohm)","1.2V MGT (exp. ~95 Ohm)","1.0V MGT (exp. ~60 Ohm)","2.5V CLK (exp. ~1850 Ohm)","3.3V OPTICAL (exp. ~1750 Ohm)",
-                        "3.3V (exp. ~310 Ohm)","VCCO Bank 0 & 65 (exp. ~125 Ohm)","1.8V VCCO (exp. ~125 Ohm)","1.8V MGT (exp. ~135 Ohm)","1.8V AUX (exp. ~130 Ohm)","1.8V (exp. ~130 Ohm)",
-                        "1.8V CLK (exp. ~2200 Ohm)","3.3V CLK (exp. ~3100 Ohm)","1.5V supply (exp. ~8760 Ohm)","3.3V supply (exp. ~3600 Ohm)","5V supply (exp. ~2300 Ohm)","F21 5V fuse",
-                        "F22 3.3V fuse","F23 1A fuse","F24 1A fuse"]
+    resistance_labels =["3.6V PPIB (ODMB7, exp. ~320 Ohm)","0.95V core (exp. ~10 Ohm)","1.2V MGT (exp. ~95 Ohm)","1.0V MGT (exp. ~60 Ohm)","2.5V CLK (exp. ~1850 Ohm)","3.3V OPTICAL (exp. ~1750 Ohm; exp. ~1850 Ohm w/o T12)",
+                        "3.3V (exp. ~310 Ohm)","VCCO Bank 0 & 65 (exp. ~125 Ohm)","1.8V VCCO (exp. ~115 Ohm)","1.8V MGT (exp. ~135 Ohm)","1.8V AUX (exp. ~130 Ohm)","1.8V (exp. ~130 Ohm)",
+                        "1.8V CLK (exp. ~2200 Ohm; exp. ~1250 Ohm w/o T12)","3.3V CLK (exp. ~3100 Ohm)","1.5V supply (exp. ~8760 Ohm)","3.3V supply (exp. ~3600 Ohm)","5V supply (exp. ~2300 Ohm)","F21 5V fuse",
+                        "F22 3.3V fuse","F23 1A fuse","F24 1A fuse (ODMB7 only)"]
     for ipoint in range(21):
       self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(f'Resistance of ' + resistance_labels[ipoint]), required=False)
     #self.fields[f'r_summary'] = forms.BooleanField(label=f'Pass test', required=False)
@@ -207,6 +207,15 @@ class EEPROMConfigurationForm(forms.Form):
         field_basename = field.split('_')[0]
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
+
+class JitterAnalysisForm(forms.Form):
+  template_name = "board_tests/jitteranalysisform.html"
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['jitter_picture'] = forms.ImageField(label='Screenshot of oscilloscope', required=False)
+    self.fields['jitter_log'] = forms.FloatField(label='TIE measurement (in ps)', required=False)
+    self.fields['jitter_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'jitter_logurl'] = forms.URLField(label=f'URL', required=False)
 
 class VMEBasicTestForm(forms.Form):
   template_name = "board_tests/basicvmetest.html"
@@ -461,12 +470,11 @@ class OpticalPRBSTestForm(forms.Form):
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
 
-
 class TestFilterForm(forms.Form):
-  testforms_dict = {'visual inspection': VisualInspectionsForm, 'short circuit':ShortCircuitForm, 'power':PowerForm, 'clock configuration':ClockConfigurationForm, 'eeprom configuration':EEPROMConfigurationForm,
+  testforms_dict = {'visual inspection': VisualInspectionsForm, 'short circuit':ShortCircuitForm, 'power':PowerForm, 'clock configuration':ClockConfigurationForm, 'eeprom configuration':EEPROMConfigurationForm, 'jitter analysis': JitterAnalysisForm,
                     'vme basic test': VMEBasicTestForm, 'fpga clock test': FPGAClockTestForm, 'sysmon test': SysmonTestForm, 'prom test': PROMTestForm, 'ccb test': CCBTestForm, 'otmb test': OTMBTestForm,
                     'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm}
-  initial_dict = {'visual inspection': True, 'short circuit': True, 'power': True, 'clock configuration': True, 'eeprom configuration': True, 'vme basic test': True, 'fpga clock test':True, 'sysmon test': True, 
+  initial_dict = {'visual inspection': True, 'short circuit': True, 'power': True, 'clock configuration': True, 'eeprom configuration': True, 'jitter analysis': True, 'vme basic test': True, 'fpga clock test':True, 'sysmon test': True,
                   'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True}
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
