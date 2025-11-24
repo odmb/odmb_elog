@@ -145,11 +145,12 @@ class Tests(models.Model):
   """Model representing Tests."""
   id = models.AutoField(help_text="test ID", primary_key=True)
   # Tests need to follow format TESTSUMMARYNAME_TESTNAME. TESTSUMMARYNAME must NOT have underscore.
-  picture_front = models.ImageField(null=True, blank=True)
-  picture_back = models.ImageField(null=True, blank=True)
+  picture_front = models.ImageField(upload_to='board_pictures/', null=True, blank=True)
+  picture_back = models.ImageField(upload_to='board_pictures/',null=True, blank=True)
   picture_summary = models.IntegerField(null=True, blank=True)
   picture_summary_log_id = models.IntegerField(null=True, blank=True)
   picture_compunetix_id_num = models.CharField(max_length=20, null=True, blank=True)
+
 
   ##Short circuit test##
   #All resistance measurements for the regulators
@@ -230,13 +231,19 @@ class Tests(models.Model):
   
   ##Jitter analysis
   #TIE measurement
-  jitter_picture = models.ImageField(null=True, blank=True)
+  jitter_picture = models.ImageField(upload_to='jitter/', null=True, blank=True)
   jitter_log = models.FloatField(null=True, blank=True)
+  jitter_mean_freq = models.FloatField(null=True, blank=True)
+  jitter_min_freq = models.FloatField(null=True, blank=True)
+  jitter_max_freq = models.FloatField(null=True, blank=True)
+  jitter_sd = models.FloatField(null=True, blank=True)
+  
   
   #Summary checkbox
   jitter_summary = models.IntegerField(null=True, blank=True)
   jitter_summary_log_id = models.IntegerField(null=True, blank=True)
   
+
   ##Basic VME tests 
   #Checkboxes for basic VME test
   vme_done_led = models.BooleanField(null=True, blank=True)
@@ -435,6 +442,17 @@ class Tests(models.Model):
   #Summary checkbox
   opticalprbs_summary = models.IntegerField(null=True, blank=True)
   opticalprbs_summary_log_id = models.IntegerField(null=True, blank=True)
+  
+  ##Med-term Board-to-board IBERT test
+  #BER and testing duration for T12 and R12
+  medterm_r12_ber = models.FloatField(null=True, blank=True)
+  medterm_r12_duration = models.IntegerField(null=True, blank=True)
+  medterm_t12_ber = models.FloatField(null=True, blank=True)
+  medterm_t12_duration = models.IntegerField(null=True, blank=True)
+  
+  #Summary checkbox
+  medterm_summary = models.IntegerField(null=True, blank=True)
+  medterm_summary_log_id = models.IntegerField(null=True, blank=True)
   ################################################
 
 

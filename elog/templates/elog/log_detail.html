@@ -11,7 +11,7 @@
   <p><strong>Status: </strong>{{ log.status }}</p> 
   <p><strong>Tests: </strong>{{ log.tests.r_summary }}</p> 
   {% for testform in testforms %}
-    {{ testform }}
+    {% include testform.template_name with form=testform readonly=readonly %}
   {% endfor %}
 
 {% endblock %}

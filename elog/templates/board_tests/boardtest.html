@@ -1,6 +1,23 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+
+<script>
+function htmlDecode(input) {
+    const e = document.createElement('textarea');
+    e.innerHTML = input;
+    return e.value;
+}
+</script>
+
+{% if popup_errors %}
+<script>
+    const raw = `{{ popup_errors|join:"\n" }}`;
+    const message = htmlDecode(raw);
+    alert(message);
+</script>
+{% endif %}
+
   <form enctype="multipart/form-data" action="" method="post">
     {% csrf_token %}
     <b>Filters:</b>
@@ -45,7 +62,7 @@
       <p>Reference: <a href=https://docs.google.com/document/d/1fAz7HfOIg_UNvVobAWMJ2iiMlWELLe3uz3RNUsuh2AQ/edit>Link</a></p>
     </div>
     {% for testform in testforms %}
-      {{ testform }}
+      {% include testform.template_name with form=testform readonly=readonly %}
     {% endfor %}
     {{ testformcollection }}
     <input type="submit" name="submit_test" value="Submit">

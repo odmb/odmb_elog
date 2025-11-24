@@ -60,11 +60,8 @@ class BoardDetailView(generic.DetailView):
       if self.object.tests == None: continue
       filled_field_names = []
       for field_name in form.fields:
-        #print(self.object.tests._meta.get_fields())
-        #print(testform_name, field_name)
         for db_field in self.object.tests._meta.get_fields():
           if field_name == db_field.name:
-            #print(db_field.value_from_object(self.object.tests))
             form.fields[field_name].initial = db_field.value_from_object(self.object.tests)
             filled_field_names.append(field_name)
             break
@@ -78,20 +75,12 @@ class BoardDetailView(generic.DetailView):
         #print(log_id_name, log_url, log_id)
         if log_id != None:
           form.fields[log_url_name].initial = reverse_lazy('log-detail', kwargs={'pk': log_id})
-        #form.fields[log_url] = f'{self.object.tests.__dict__[log_id_name]}'
       testforms_view.append(form)
-    #testform = testfilterbase.testforms_dict['short circuit'](initial={'r_point1':self.object.tests.r_point1})
-    #testforms_view.append(testform)
     # Fill filter form
     context['testforms'] = testforms_view
     context['board_logs'] = context['board'].log_set.all().order_by('-pk')
+    context['readonly'] = True
     ## Show test_summary_log_id
-    #summary_ids = []
-    #for obj_field in context['board'].tests._meta.get_fields():
-    #  if re.search('summary_log_id',obj_field.name):
-    #    obj_value = obj_field.value_from_object(context['board'].tests)
-    #    summary_ids.append([obj_field.name, obj_value])
-    #context['summary_ids'] = summary_ids
     return context
 
 #class LogListView(generic.ListView):
@@ -132,6 +121,7 @@ class LogDetailView(generic.DetailView):
     #testforms_view.append(testform)
     # Fill filter form
     context['testforms'] = testforms_view
+    context['readonly'] = True
     return context
 
 
@@ -150,18 +140,6 @@ class LogCreate(CreateView):
     self.object.board.save()
     return HttpResponseRedirect(self.get_success_url())
 
-class LogUpdate(UpdateView):
-  model = Log
-  #fields = ['id', 'board', 'date', 'location', 'file', 'text', 'status']
-  form_class = LogForm
-  def form_valid(self, form):
-    self.object = form.save()
-    # Update if most recent log
-    board_logs = Log.objects.filter(board=self.object.board).filter(location__isnull=False).order_by('-date')
-    if (self.object == board_logs[0]): 
-      self.object.board.location = self.object.location
-      self.object.board.save()
-    return HttpResponseRedirect(self.get_success_url())
 
 class LogDelete(DeleteView):
   model = Log
@@ -178,12 +156,34 @@ class BoardDelete(DeleteView):
   model = Board
   success_url = reverse_lazy('boards')
 
+testform_display_names = {
+    "VisualInspectionsForm": "Visual inspection",
+    "ShortCircuitForm": "Short circuit test",
+    "PowerForm": "Power test",
+    "ClockConfigurationForm": "Clock configuration",
+    "EEPROMConfigurationForm": "EEPROM configuration",
+    "JitterAnalysisForm": "Jitter analysis",
+    "VMEBasicTestForm": "Basic VME Test",
+    "FPGAClockTestForm": "FPGA clock test",
+    "SysmonTestForm": "System monitoring test",
+    "PROMTestForm": "PROM test",
+    "CCBTestForm": "CCB test",
+    "OTMBTestForm": "OTMB test",
+    "LVMBTestForm": "LVMB/LVMB7 test",
+    "DCFEBJTAGTestForm": "DCFEB JTAG test",
+    "DCFEBFastSignalTestForm": "DCFEB fast signal test",
+    "OpticalPRBSTestForm": "Optical PRBS test",
+    "MedtermTestForm": "Med-term board-to-board IBERT test"
+}
+
+
 # Make a view for update boardtest
 from .forms import BoardTestForm, TestFilterForm
 def get_boardtest(request, *args, **kwargs):
   # Setup filter
   testforms_view = []
   testfilterbase = TestFilterForm()
+  readonly = False
 
   if request.method == 'POST':
     # Fill form
@@ -192,15 +192,15 @@ def get_boardtest(request, *args, **kwargs):
     # Fill filter form
     #print('testfilter.is_valid',testfilter.is_valid())
     if testfilter.is_valid():
-      for testform_name in testfilter.cleaned_data:
-        #print('testform_name',testform_name)
-        #print('testfilter.cleaned_data', testfilter.cleaned_data)
-        if testfilter.cleaned_data['deselect']: 
-          testfilter = TestFilterForm(prefix='testfilter')
-          testforms_view.clear()
-          break
-        elif testfilter.cleaned_data[testform_name]: 
-          testforms_view.append(testfilterbase.testforms_dict[testform_name](request.POST, prefix=testform_name))
+      if testfilter.cleaned_data.get('deselect'):
+        testfilter = TestFilterForm(prefix='testfilter')
+        testforms_view.clear()
+      else:
+        for testform_name in testfilterbase.testforms_dict:
+          if testfilter.cleaned_data.get(testform_name): testforms_view.append(testfilterbase.testforms_dict[testform_name](request.POST, request.FILES, prefix=testform_name))
+
+
+
     #print('(0)testforms_view: ',testforms_view)
     # Check if form is valid
     forms_valid = True
@@ -208,7 +208,18 @@ def get_boardtest(request, *args, **kwargs):
       if not testform.is_valid(): 
         forms_valid = False
     # Action after successful submit
-    if form.is_valid() and forms_valid and 'submit_test' in request.POST:  
+    if 'submit_test' in request.POST:
+      popup_errors = []
+      for testform in testforms_view:
+        errors = testform.non_field_errors()
+        if errors:
+          class_name = testform.__class__.__name__
+          friendly_name = testform_display_names[class_name]
+          for error in errors:
+            popup_errors.append(f'{error} for {friendly_name}')
+
+      if popup_errors or not form.is_valid() or not forms_valid:
+          return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly, 'popup_errors': popup_errors})
       print('cleaned form',form.cleaned_data)
       for itestform, testform in enumerate(testforms_view):
         print(f'cleaned testform {itestform}',testform.cleaned_data)
@@ -245,7 +256,7 @@ def get_boardtest(request, *args, **kwargs):
         if re.search('summary(?!_)',obj_field.name):
           obj_value = obj_field.value_from_object(tests_obj)
           #print(obj_field, repr(obj_value))
-          if obj_value != '-1':
+          if obj_value != -1:
             test_summary_dict[f'{obj_field.name}_log_id'] = log_obj.id
       #print(test_summary_dict)
       tests_obj.__dict__.update(test_summary_dict)
@@ -297,7 +308,7 @@ def get_boardtest(request, *args, **kwargs):
     for testform_name in testfilterbase.testforms_dict:
       if testform_name in testfilterbase.initial_dict:
         testforms_view.append(testfilterbase.testforms_dict[testform_name](prefix=testform_name))
-  return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter})
+  return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly})
 
 def update_boardtest(request, *args, **kwargs):
   # Setup filter
@@ -306,22 +317,22 @@ def update_boardtest(request, *args, **kwargs):
   log_id = kwargs['pk']
   log_obj = Log.objects.get(pk=log_id)
   test_id = log_obj.tests.id
+  readonly = False
 
   if request.method == 'POST':
     # Fill form
-    form = BoardTestForm(request.POST, request.FILES, prefix='boardtest')
+    form = BoardTestForm(request.POST, request.FILES, instance=log_obj, prefix='boardtest')
     testfilter = TestFilterForm(request.POST, prefix='testfilter')
     # Fill filter form
     if testfilter.is_valid():
-      for testform_name in testfilter.cleaned_data:
-        if testfilter.cleaned_data['deselect']: 
-          testfilter = TestFilterForm(prefix='testfilter')
-          testforms_view.clear()
-          break
-        elif testfilter.cleaned_data[testform_name]: 
-          #print('will try to fill',testform_name)
-          #print('with data', request.POST)
-          testforms_view.append(testfilterbase.testforms_dict[testform_name](request.POST))
+      if testfilter.cleaned_data.get('deselect'):
+        testfilter = TestFilterForm(prefix='testfilter')
+        testforms_view.clear()
+      else:
+        for testform_name in testfilterbase.testforms_dict:
+          if testfilter.cleaned_data.get(testform_name):
+            testforms_view.append(testfilterbase.testforms_dict[testform_name](request.POST,request.FILES,prefix=testform_name))
+    
     # Check if form is valid
     forms_valid = True
     for testform in testforms_view:
@@ -329,73 +340,91 @@ def update_boardtest(request, *args, **kwargs):
         forms_valid = False
       #print('was it inserted?',testform.cleaned_data)
     # Action after successful submit
-    if form.is_valid() and forms_valid and 'submit_test' in request.POST:  
-      #print('cleaned form',form.cleaned_data)
-      #for itestform, testform in enumerate(testforms_view):
-      #  print(f'cleaned testform {itestform}',testform.cleaned_data)
-      board_obj = form.cleaned_data['board']
-      date_obj = form.cleaned_data['date']
-      location_obj = form.cleaned_data['location']
-      text_obj = form.cleaned_data['text']
-      # Fill form data
-      form_data = {}
-      for testform in testforms_view:
-        #print('to fill',testform.cleaned_data)
-        #form_data.update(testform.cleaned_data)
-        for testform_field in testform.cleaned_data:
-          if 'logurl' in testform_field: continue
-          form_data[testform_field] = testform.cleaned_data[testform_field]
-      #tests_obj = Tests(**{'r_point1':testforms_view[0].cleaned_data['r_point1'], 'r_summary':True})
-      #print('to_fill',form_data)
+          
+    if 'submit_test' in request.POST:
+        popup_errors = []
+        for testform in testforms_view:
+            errors = testform.non_field_errors()
+            if errors:
+                class_name = testform.__class__.__name__
+                friendly_name = testform_display_names[class_name]
+                for error in errors:
+                    popup_errors.append(f'{error} for {friendly_name}')
+     
+        if popup_errors or not form.is_valid() or not forms_valid:
+            return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly, 'popup_errors': popup_errors})
+        board_obj = form.cleaned_data['board']
+        date_obj = form.cleaned_data['date']
+        location_obj = form.cleaned_data['location']
+        text_obj = form.cleaned_data['text']
+        # Fill form data
+        form_data = {}
+        for testform in testforms_view:
+            #print('to fill',testform.cleaned_data)
+            #form_data.update(testform.cleaned_data)
+            for testform_field in testform.cleaned_data:
+                if 'logurl' in testform_field: continue
+                form_data[testform_field] = testform.cleaned_data[testform_field]
+        #tests_obj = Tests(**{'r_point1':testforms_view[0].cleaned_data['r_point1'], 'r_summary':True})
+        #print('to_fill',form_data)
 
-      # Update objects in db
-      #Tests.objects.filter(pk=test_id).update(**form_data)
-      tests_obj = Tests.objects.get(pk=test_id)
-      tests_obj.__dict__.update(form_data)
-      tests_obj.save()
-      #print(Tests.objects.get(pk=test_id).r_summary)
-      log_obj = Log.objects.get(pk=log_id)
-      log_obj.__dict__.update({'board':board_obj, 'date':date_obj, 'location':location_obj, 'text':text_obj})
-      log_obj.save()
-      #Log.objects.filter(pk=log_id).update(board=board_obj, date=date_obj, location=location_obj, text=text_obj)
-      #log_obj = Log(board=board_obj, date=date_obj, location=location_obj, tests=tests_obj, text=text_obj)
-      #log_obj.save()
+        tests_obj = Tests.objects.get(pk=test_id)
+        for testform in testforms_view:
+            for key, value in testform.cleaned_data.items():
+                full_name = f"{testform.prefix}-{key}"
+                field = testform.fields[key]
+                if isinstance(field, forms.ImageField):
+                    if full_name not in request.FILES:
+                        continue
+                if full_name not in request.POST and full_name not in request.FILES:
+                    continue
+                setattr(tests_obj, key, value)
 
-      #print(form.cleaned_data['picture'].image)
-      #return HttpResponseRedirect(reverse_lazy('index'))
-      # If most recent, update board db
-      #print('location log id',board_obj.location_log_id, 'current log id', log_obj.id)
-      if log_obj.id == board_obj.location_log_id:
-        board_obj.location = location_obj
-        board_obj.save()
-      # Update board status if test_log_id == log_obj.id
-      modified_test_basenames = []
-      for obj_field in board_obj.tests._meta.get_fields():
-        if 'summary_log_id' in obj_field.name:
-          obj_value = obj_field.value_from_object(board_obj.tests)
-          if obj_value != log_obj.id: continue
-          print(obj_field.name, obj_value, log_obj.id)
-          modified_test_basenames.append(obj_field.name.split('_')[0])
-      is_board_obj_modified = False
-      for test_field in tests_obj._meta.get_fields():
-        if len(test_field.name.split('_')) == 1: continue # Ignore fields that are not tests
-        test_basename = test_field.name.split('_')[0]
-        if test_basename not in modified_test_basenames: continue # Ignore fields that have not been modified
-        print(f'Updating {test_field.name} from {board_obj.tests.__dict__[test_field.name]} to {tests_obj.__dict__[test_field.name]}')
-        board_obj.tests.__dict__[test_field.name] = tests_obj.__dict__[test_field.name]
-        is_board_obj_modified = True
-      if is_board_obj_modified: 
-        print('Trying to save board obj')
-        board_obj.tests.save()
+        tests_obj.save()
+        #print(Tests.objects.get(pk=test_id).r_summary)
+        log_obj.board = board_obj
+        log_obj.date = date_obj
+        log_obj.location = location_obj
+        log_obj.text = text_obj
+        log_obj.save()
+        #Log.objects.filter(pk=log_id).update(board=board_obj, date=date_obj, location=location_obj, text=text_obj)
+        #log_obj = Log(board=board_obj, date=date_obj, location=location_obj, tests=tests_obj, text=text_obj)
+        #log_obj.save()
 
-      return HttpResponseRedirect(reverse_lazy('logs'))
+        #print(form.cleaned_data['picture'].image)
+        #return HttpResponseRedirect(reverse_lazy('index'))
+        # If most recent, update board db
+        #print('location log id',board_obj.location_log_id, 'current log id', log_obj.id)
+        if log_obj.id == board_obj.location_log_id:
+            board_obj.location = location_obj
+            board_obj.save()
+        # Update board status if test_log_id == log_obj.id
+        modified_test_basenames = []
+        for obj_field in board_obj.tests._meta.get_fields():
+            if 'summary_log_id' in obj_field.name:
+                obj_value = obj_field.value_from_object(board_obj.tests)
+                if obj_value != log_obj.id: continue
+                print(obj_field.name, obj_value, log_obj.id)
+                modified_test_basenames.append(obj_field.name.split('_')[0])
+        is_board_obj_modified = False
+        for test_field in tests_obj._meta.get_fields():
+            if len(test_field.name.split('_')) == 1: continue # Ignore fields that are not tests
+            test_basename = test_field.name.split('_')[0]
+            if test_basename not in modified_test_basenames: continue # Ignore fields that have not been modified
+            print(f'Updating {test_field.name} from {board_obj.tests.__dict__[test_field.name]} to {tests_obj.__dict__[test_field.name]}')
+            board_obj.tests.__dict__[test_field.name] = tests_obj.__dict__[test_field.name]
+            is_board_obj_modified = True
+        if is_board_obj_modified:
+            print('Trying to save board obj')
+            board_obj.tests.save()
+
+        return HttpResponseRedirect(reverse_lazy('logs'))
   else:
     # Get data from database
     testforms_view = []
     testforms_initial = {}
     for testform_name in testfilterbase.testforms_dict:
-      form = testfilterbase.testforms_dict[testform_name]()
-      # Fill form if field is in object.tests
+      form = testfilterbase.testforms_dict[testform_name](prefix=testform_name)
       for field_name in form.fields:
         for db_field in log_obj.tests._meta.get_fields():
           if field_name == db_field.name:
@@ -407,4 +436,4 @@ def update_boardtest(request, *args, **kwargs):
     # Fill form
     form = BoardTestForm(prefix='boardtest', initial=boardtest_initial)
     testfilter = TestFilterForm(prefix='testfilter', initial=testforms_initial)
-  return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter})
+  return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly})

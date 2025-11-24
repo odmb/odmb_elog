@@ -101,8 +101,25 @@ class VisualInspectionsForm(forms.Form):
     self.fields['picture_front'] = forms.ImageField(label='Front picture', required=False)
     self.fields['picture_back'] = forms.ImageField(label='Back picture', required=False)
     self.fields['picture_compunetix_id_num'] = forms.CharField(label='Compunetix label for ODMB7/5 board (ex. WVVHC-004)', required=False)
-    self.fields['picture_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields['picture_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'picture_logurl'] = forms.URLField(label=f'URL', required=False)
+  def clean(self):
+    cleaned_data = super().clean()
+    # Find filled summary fields
+    filled_summary_basenames = []
+    #print(cleaned_data)
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
+    #print(filled_summary_basenames)
+    # Make sure if value is filled, that summary is filled.
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field): continue
+      value = cleaned_data[field]
+      if value:
+        field_basename = field.split('_')[0]
+        if field_basename not in filled_summary_basenames:
+          #print(f'error {field}, {cleaned_data[field]}')
+          raise ValidationError(f'Please change state of "Not tested"')
 
 class ShortCircuitForm(forms.Form):
   template_name = "board_tests/shortcircuitform.html"
@@ -115,7 +132,7 @@ class ShortCircuitForm(forms.Form):
     for ipoint in range(21):
       self.fields[f'r_point{ipoint}'] = forms.FloatField(label=(f'Resistance of ' + resistance_labels[ipoint]), required=False)
     #self.fields[f'r_summary'] = forms.BooleanField(label=f'Pass test', required=False)
-    self.fields[f'r_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'r_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'r_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
@@ -123,7 +140,7 @@ class ShortCircuitForm(forms.Form):
     filled_summary_basenames = []
     #print(cleaned_data)
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     #print(filled_summary_basenames)
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
@@ -142,14 +159,14 @@ class PowerForm(forms.Form):
     power_supply_labels = ["1.5V power supply", "3.3V power supply", "5V power supply"]
     for ipoint in range(3):
       self.fields[f'a_point{ipoint}'] = forms.FloatField(label=(power_supply_labels[ipoint] + f' current (A)'), required=False)
-    self.fields[f'a_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'a_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'a_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -165,14 +182,14 @@ class ClockConfigurationForm(forms.Form):
     super().__init__(*args, **kwargs)
     for ipoint in range(12):
       self.fields[f'led_{ipoint}'] = forms.BooleanField(label=f'LED {ipoint}', required=False)
-    self.fields[f'led_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'led_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'led_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -191,14 +208,41 @@ class EEPROMConfigurationForm(forms.Form):
     self.fields[f'eeprom_5V_current'] = forms.FloatField(label=('Current for 5V supply (expect ~2.9A)'), required=False)
     self.fields[f'eeprom_3p3V_current'] = forms.FloatField(label=('Current for 3.3V supply (expect ~2.1A)'), required=False)
     self.fields[f'eeprom_1p5V_current'] = forms.FloatField(label=('Current for 1.5V supply (expect ~0A)'), required=False)
-    self.fields[f'eeprom_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'eeprom_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'eeprom_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
+    # Make sure if value is filled, that summary is filled.
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field): continue
+      value = cleaned_data[field]
+      if value:
+        field_basename = field.split('_')[0]
+        if field_basename not in filled_summary_basenames:
+          raise ValidationError(f'Please change state of "Not tested"')
+          
+class JitterAnalysisForm(forms.Form):
+  template_name = "board_tests/jitteranalysisform.html"
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['jitter_picture'] = forms.ImageField(label='Screenshot of oscilloscope', required=False)
+    self.fields['jitter_log'] = forms.FloatField(label='TIE measurement (in ps)', required=False)
+    self.fields['jitter_mean_freq'] = forms.FloatField(label=('Mean frequency (in MHz)'), required=False)
+    self.fields['jitter_min_freq'] = forms.FloatField(label=('Minimum frequency (in MHz)'), required=False)
+    self.fields['jitter_max_freq'] = forms.FloatField(label=('Maximum frequency (in MHz)'), required=False)
+    self.fields['jitter_sd'] = forms.FloatField(label=('Standard deviation (in kHz)'), required=False)
+    self.fields['jitter_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
+    self.fields[f'jitter_logurl'] = forms.URLField(label=f'URL', required=False)
+  def clean(self):
+    cleaned_data = super().clean()
+    # Find filled summary fields
+    filled_summary_basenames = []
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -208,29 +252,20 @@ class EEPROMConfigurationForm(forms.Form):
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
 
-class JitterAnalysisForm(forms.Form):
-  template_name = "board_tests/jitteranalysisform.html"
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.fields['jitter_picture'] = forms.ImageField(label='Screenshot of oscilloscope', required=False)
-    self.fields['jitter_log'] = forms.FloatField(label='TIE measurement (in ps)', required=False)
-    self.fields['jitter_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
-    self.fields[f'jitter_logurl'] = forms.URLField(label=f'URL', required=False)
-
 class VMEBasicTestForm(forms.Form):
   template_name = "board_tests/basicvmetest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.fields[f'vme_done_led'] = forms.BooleanField(label=f'Board successfully progammed itself from the EEPROM', required=False)
     self.fields[f'vme_basic_communication'] = forms.BooleanField(label=f'Communication with VCC was successful', required=False)
-    self.fields[f'vme_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'vme_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'vme_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -244,14 +279,14 @@ class FPGAClockTestForm(forms.Form):
   template_name = "board_tests/fpgaclocktest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'fpgaclk_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'fpgaclk_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'fpgaclk_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -260,7 +295,6 @@ class FPGAClockTestForm(forms.Form):
         field_basename = field.split('_')[0]
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
-
 
 class SysmonTestForm(forms.Form):
   template_name = "board_tests/sysmontest.html"
@@ -290,7 +324,7 @@ class SysmonTestForm(forms.Form):
       self.fields[f'sysmon_voltage{ipoint}'] = forms.FloatField(label=(voltage_labels[ipoint] + f' sysmon voltage pin (pin {ipoint})'), required=False)
 
     #Summary button
-    self.fields[f'sysmon_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'sysmon_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'sysmon_logurl'] = forms.URLField(label=f'URL', required=False)
 
   def clean(self):
@@ -298,7 +332,7 @@ class SysmonTestForm(forms.Form):
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -312,14 +346,14 @@ class PROMTestForm(forms.Form):
   template_name = "board_tests/promtest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'prom_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'prom_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'prom_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -333,14 +367,14 @@ class CCBTestForm(forms.Form):
   template_name = "board_tests/ccbtest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'ccb_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'ccb_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'ccb_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -354,14 +388,14 @@ class OTMBTestForm(forms.Form):
   template_name = "board_tests/otmbtest.html"
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.fields[f'otmb_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'otmb_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'otmb_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -377,14 +411,14 @@ class LVMBTestForm(forms.Form):
     super().__init__(*args, **kwargs)
     for ipoint in range(7):
       self.fields[f'lvmb_adc_{ipoint}'] = forms.BooleanField(label=f'LVMB ADC{ipoint} passes', required=False)
-    self.fields[f'lvmb_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'lvmb_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'lvmb_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -400,14 +434,14 @@ class DCFEBJTAGTestForm(forms.Form):
     super().__init__(*args, **kwargs)
     for ipoint in range(7):
       self.fields[f'dcfebjtag_{ipoint}_connected'] = forms.BooleanField(label=f'xDCFEB{ipoint} passes', required=False)
-    self.fields[f'dcfebjtag_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'dcfebjtag_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'dcfebjtag_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -416,6 +450,7 @@ class DCFEBJTAGTestForm(forms.Form):
         field_basename = field.split('_')[0]
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
+
 
 
 class DCFEBFastSignalTestForm(forms.Form):
@@ -426,14 +461,14 @@ class DCFEBFastSignalTestForm(forms.Form):
     for ipoint in range(35):
       label_temp = "xDCFEB" + str(ipoint//5) + " " + labels_signal[ipoint%5] +  " succesfully sent"
       self.fields[f'dcfebfastsignal_signal{ipoint}'] = forms.FloatField(label=label_temp, required=False)
-    self.fields[f'dcfebfastsignal_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'dcfebfastsignal_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'dcfebfastsignal_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -442,6 +477,7 @@ class DCFEBFastSignalTestForm(forms.Form):
         field_basename = field.split('_')[0]
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
+
 
 class OpticalPRBSTestForm(forms.Form):
   template_name = "board_tests/opticalprbstest.html"
@@ -453,14 +489,40 @@ class OpticalPRBSTestForm(forms.Form):
     self.fields[f'opticalprbs_3_pass'] = forms.BooleanField(label=f'Test of T12 - all 12 links', required=False)
     self.fields[f'opticalprbs_4_pass'] = forms.BooleanField(label=f'Test of SPY Tx', required=False)
     self.fields[f'opticalprbs_5_pass'] = forms.BooleanField(label=f'Test of SPY Rx', required=False)
-    self.fields[f'opticalprbs_summary'] = forms.ChoiceField(label=f'Pass test', required=False, choices=(("-1","Not tested"),("1","Pass"),("0","Fail")), initial='-1')
+    self.fields[f'opticalprbs_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
     self.fields[f'opticalprbs_logurl'] = forms.URLField(label=f'URL', required=False)
   def clean(self):
     cleaned_data = super().clean()
     # Find filled summary fields
     filled_summary_basenames = []
     for field in cleaned_data:
-      if re.search('summary(?!_)',field) and cleaned_data[field] != '-1': filled_summary_basenames.append(field.split('_')[0])
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
+    # Make sure if value is filled, that summary is filled.
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field): continue
+      value = cleaned_data[field]
+      if value:
+        field_basename = field.split('_')[0]
+        if field_basename not in filled_summary_basenames:
+          raise ValidationError(f'Please change state of "Not tested"')
+ 
+ 
+class MedtermTestForm(forms.Form):
+  template_name = "board_tests/medtermtestform.html"
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['medterm_r12_ber'] = forms.FloatField(label='R12 BER (10^-14)', required=False)
+    self.fields['medterm_r12_duration'] = forms.IntegerField(label='R12 testing duration (in min)', required=False)
+    self.fields['medterm_t12_ber'] = forms.FloatField(label='T12 BER (10^-14)', required=False)
+    self.fields['medterm_t12_duration'] = forms.IntegerField(label='T12 testing duration (in min)', required=False)
+    self.fields['medterm_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
+    self.fields['medterm_logurl'] = forms.URLField(label=f'URL', required=False)
+  def clean(self):
+    cleaned_data = super().clean()
+    # Find filled summary fields
+    filled_summary_basenames = []
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
     # Make sure if value is filled, that summary is filled.
     for field in cleaned_data:
       if re.search('summary(?!_)',field): continue
@@ -473,9 +535,9 @@ class OpticalPRBSTestForm(forms.Form):
 class TestFilterForm(forms.Form):
   testforms_dict = {'visual inspection': VisualInspectionsForm, 'short circuit':ShortCircuitForm, 'power':PowerForm, 'clock configuration':ClockConfigurationForm, 'eeprom configuration':EEPROMConfigurationForm, 'jitter analysis': JitterAnalysisForm,
                     'vme basic test': VMEBasicTestForm, 'fpga clock test': FPGAClockTestForm, 'sysmon test': SysmonTestForm, 'prom test': PROMTestForm, 'ccb test': CCBTestForm, 'otmb test': OTMBTestForm,
-                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm}
+                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm, 'med-term test': MedtermTestForm}
   initial_dict = {'visual inspection': True, 'short circuit': True, 'power': True, 'clock configuration': True, 'eeprom configuration': True, 'jitter analysis': True, 'vme basic test': True, 'fpga clock test':True, 'sysmon test': True,
-                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True}
+                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True, 'med-term test': True}
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     for testname in self.testforms_dict:

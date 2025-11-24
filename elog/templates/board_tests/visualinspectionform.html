@@ -1,13 +1,48 @@
 <div>
-  <b>Visual inspection</b>: Check that the ICs and connectors are soldered well 
+  <b>Visual inspection</b>: Check that the ICs and connectors are soldered well
      on the board and create photographs for later reference.<br>
-{{ form.non_field_errors }}
 {% for field in form %}
   {% if "logurl" not in field.id_for_label %}
   <div>
-    {{ field.label_tag }} {{ field }}
-    {{ field.errors }}
+    {{ field.label_tag }}
+    {% if not readonly %}
+      {% if field.field.widget.input_type == "file" %}
+        {% if field.value %}
+          Current picture:
+          <a href="{{ field.value.url }}">{{ field.value.name }}</a>
+          Change:
+          <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}">
+        {% else %}
+        <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}">
+        {% endif %}
+        {{ field.errors }}
+        {% else %}
+            {{ field }}
+            {{ field.errors }}
+        {% endif %}
+    {% else %}
+        {% if field.field.widget.input_type == "file" %}
+          {% if field.value %}
+            <a href="{{ field.value.url }}">View</a>
+          {% else %}
+            <span style="color:gray;"><em>No image uploaded.</em></span>
+          {% endif %}
+        {% elif "_summary" in field.name %}
+          {% if field.value == -1 %}
+            <span style="color:gray;"><em>Not tested</em></span>
+          {% elif field.value == 0 %}
+            <span style="color:red;">Fail</span>
+          {% elif field.value == 1 %}
+            <span style="color:green;">Pass</span>
+          {% endif %}
+        {% elif field.value %}
+          {{ field.value }}
+        {% else %}
+          <span style="color:gray;"><em>No data.</em></span>
+        {% endif %}
+    {% endif %}
   </div>
+
   {% elif field.value != None %}
   <div>Link to log: <a href="{{ field.value }}">{{ field.value }}</a></div>
   {% endif %}

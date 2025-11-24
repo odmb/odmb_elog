@@ -10,7 +10,6 @@ urlpatterns = [
   path('logs', views.LogListView.as_view(), name='logs'),
   path('log/<int:pk>', views.LogDetailView.as_view(), name='log-detail'),
   path('log/create/', views.LogCreate.as_view(), name='log-create'),
-  path('log/<int:pk>/update/', views.LogUpdate.as_view(), name='log-update'),
   path('log/<int:pk>/delete/', views.LogDelete.as_view(), name='log-delete'),
   path('boardtest/create/', views.get_boardtest, name='boardtest-create'),
   path('boardtest/<int:pk>/update', views.update_boardtest, name='boardtest-update'),

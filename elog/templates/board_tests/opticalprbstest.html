@@ -1,11 +1,27 @@
 <div>
 <b>Optical PRBS test</b>: Checks if optical transceivers are operating correctly.  
-{{ form.non_field_errors }}
 {% for field in form %}
 {% if "logurl" not in field.id_for_label %}
 <div>
-  {{ field.label_tag }} {{ field }}
-  {{ field.errors }}
+    {{ field.label_tag }}
+    {% if not readonly %}
+          {{ field }}
+          {{ field.errors }}
+    {% else %}
+      {% if "_summary" in field.name %}
+        {% if field.value == -1 %}
+          <span style="color:gray;"><em>Not tested</em></span>
+        {% elif field.value == 0 %}
+          <span style="color:red;">Fail</span>
+        {% elif field.value == 1 %}
+          <span style="color:green;">Pass</span>
+        {% endif %}
+      {% elif field.value %}
+        {{ field.value }}
+      {% else %}
+        <span style="color:gray;"><em>No data.</em></span>
+      {% endif %}
+    {% endif %}
 </div>
 {% elif field.value != None %}
 <div>Link to log: <a href="{{ field.value }}">{{ field.value }}</a></div>
