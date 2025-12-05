@@ -232,7 +232,7 @@ class Tests(models.Model):
   ##Jitter analysis
   #TIE measurement
   jitter_picture = models.ImageField(upload_to='jitter/', null=True, blank=True)
-  jitter_log = models.FloatField(null=True, blank=True)
+  jitter_tie = models.FloatField(null=True, blank=True)
   jitter_mean_freq = models.FloatField(null=True, blank=True)
   jitter_min_freq = models.FloatField(null=True, blank=True)
   jitter_max_freq = models.FloatField(null=True, blank=True)

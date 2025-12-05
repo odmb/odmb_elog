@@ -230,7 +230,7 @@ class JitterAnalysisForm(forms.Form):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.fields['jitter_picture'] = forms.ImageField(label='Screenshot of oscilloscope', required=False)
-    self.fields['jitter_log'] = forms.FloatField(label='TIE measurement (in ps)', required=False)
+    self.fields['jitter_tie'] = forms.FloatField(label='TIE measurement (in ps)', required=False)
     self.fields['jitter_mean_freq'] = forms.FloatField(label=('Mean frequency (in MHz)'), required=False)
     self.fields['jitter_min_freq'] = forms.FloatField(label=('Minimum frequency (in MHz)'), required=False)
     self.fields['jitter_max_freq'] = forms.FloatField(label=('Maximum frequency (in MHz)'), required=False)
