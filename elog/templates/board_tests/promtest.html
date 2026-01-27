@@ -9,13 +9,15 @@
           {{ field.errors }}
     {% else %}
       {% if "_summary" in field.name %}
-        {% if field.value == -1 %}
+        {% if field.value == -1 or field.value is none %}
           <span style="color:gray;"><em>Not tested</em></span>
         {% elif field.value == 0 %}
           <span style="color:red;">Fail</span>
         {% elif field.value == 1 %}
           <span style="color:green;">Pass</span>
         {% endif %}
+      {% elif field.value == 0 %}
+          {{ field.value }}
       {% elif field.value %}
         {{ field.value }}
       {% else %}

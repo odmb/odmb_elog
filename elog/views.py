@@ -256,7 +256,7 @@ def get_boardtest(request, *args, **kwargs):
         if re.search('summary(?!_)',obj_field.name):
           obj_value = obj_field.value_from_object(tests_obj)
           #print(obj_field, repr(obj_value))
-          if obj_value != -1:
+          if obj_value in (0, 1):
             test_summary_dict[f'{obj_field.name}_log_id'] = log_obj.id
       #print(test_summary_dict)
       tests_obj.__dict__.update(test_summary_dict)
