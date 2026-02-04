@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views import generic
-from .models import BoardType, Board, Location, Log, BoardStatus, Tests
+from .models import BoardType, Board, Location, TerraGreen, Log, BoardStatus, Tests
 import re
 
 # Create your views here.
@@ -147,7 +147,7 @@ class LogDelete(DeleteView):
 
 class BoardCreate(CreateView):
   model = Board
-  fields = ['board_id', 'board_type', 'location']
+  fields = ['board_id', 'board_type', 'location', 'terragreen']
   def form_valid(self, form):
     self.object = form.save()
     return HttpResponseRedirect(self.get_success_url())

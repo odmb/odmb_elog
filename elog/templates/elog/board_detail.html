@@ -3,8 +3,9 @@
 {% block content %}
   <h1>Title: {{ board }}</h1>
 
-  <p><strong>Location: </strong>{{ board.location }}</p> 
-  <p><strong>Status: </strong>{{ board.status }}</p> 
+  <p><strong>Location: </strong>{{ board.location }}</p>
+  <p><strong>TerraGreen: </strong>{{ board.terragreen }}</p> 
+  <p><strong>Status: </strong>{{ board.status }}</p>
   <p><strong>Tests: </strong>{{ log.tests.r_summary }}</p> 
   {% for testform in testforms %}
     {% include testform.template_name with form=testform readonly=readonly %}

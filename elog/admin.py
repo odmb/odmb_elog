@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import BoardType, Board, Location, Log, BoardStatus, Tests, TestResult
+from .models import BoardType, Board, Location, TerraGreen, Log, BoardStatus, Tests, TestResult
 
 #admin.site.register(BoardType)
 #admin.site.register(Board)
@@ -23,8 +23,8 @@ class TestsInline(admin.TabularInline):
 
 @admin.register(Board)
 class BoardAdmin(admin.ModelAdmin):
-  list_display = ('board_type', 'board_id', 'location')
-  list_filter = ('board_type', 'status', 'location')
+  list_display = ('board_type', 'board_id', 'location', 'terragreen')
+  list_filter = ('board_type', 'status', 'location', 'terragreen')
   inlines = [LogInline]
 
 @admin.register(Log)
@@ -42,6 +42,13 @@ class LocationAdmin(admin.ModelAdmin):
   list_display = ('name',)
   inlines = [BoardInline]
 
+@admin.register(TerraGreen)
+class TerraGreenAdmin(admin.ModelAdmin):
+  list_display = ('name',)
+  inlines = [BoardInline]
+
 @admin.register(Tests)
 class TestsAdmin(admin.ModelAdmin):
   inlines = [LogInline]
+  
+

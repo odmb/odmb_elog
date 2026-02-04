@@ -12,7 +12,7 @@ class BoardFilter(django_filters.FilterSet):
   test_or_query = django_filters.CharFilter(method='test_search_or', label="Tests (OR)", widget=TextInput(attrs={'placeholder': ''.join(['*']*ntests)}))
   class Meta:
     model = Board
-    fields = ['board_id', 'board_type', 'location', 'status']
+    fields = ['board_id', 'board_type', 'location', 'terragreen', 'status']
   def test_search(self, queryset, name, value):
     summary_list = []
     # Search for all summary in test

@@ -10,6 +10,13 @@ class Location(models.Model):
     """String for representing Model object."""
     return self.name
 
+class TerraGreen(models.Model):
+  """Model representing TerraGreen used for board."""
+  name = models.CharField(max_length=200, help_text='Enter a TerraGreen type for boards')
+  def __str__(self):
+    """String for representing Model object."""
+    return self.name
+
 class TestResult(models.Model):
   """Model representing test result."""
   name = models.CharField(max_length=200, help_text='Enter test result')
@@ -35,6 +42,7 @@ class Board(models.Model):
   board_type = models.ForeignKey('BoardType', on_delete=models.RESTRICT)
   location = models.ForeignKey('Location', on_delete=models.SET_NULL, null=True)
   location_log_id = models.IntegerField(null=True, blank=True)
+  terragreen = models.ForeignKey('TerraGreen', on_delete=models.SET_NULL, null=True, blank=True)
   status = models.ForeignKey('BoardStatus', on_delete=models.SET_NULL, null=True, blank=True)
   tests = models.OneToOneField('Tests', on_delete=models.SET_NULL, null=True, blank=True)
 
