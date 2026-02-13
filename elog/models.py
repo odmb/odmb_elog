@@ -462,6 +462,22 @@ class Tests(models.Model):
   medterm_summary = models.IntegerField(null=True, blank=True)
   medterm_summary_log_id = models.IntegerField(null=True, blank=True)
   ################################################
+  
+  ##Step 27 test
+  #Histogram checkbox and path to server
+  hist_1 = models.BooleanField(null=True, blank=True)
+  hist_2 = models.BooleanField(null=True, blank=True)
+  hist_3 = models.BooleanField(null=True, blank=True)
+  hist_4 = models.BooleanField(null=True, blank=True)
+  hist_5 = models.BooleanField(null=True, blank=True)
+  hist_6 = models.BooleanField(null=True, blank=True)
+  hist_path = models.CharField(max_length=200, null=True, blank=True)
+
+  
+  #Summary checkbox
+  hist_summary = models.IntegerField(null=True, blank=True)
+  hist_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
 
 
   def __str__(self):

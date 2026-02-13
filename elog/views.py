@@ -173,7 +173,8 @@ testform_display_names = {
     "DCFEBJTAGTestForm": "DCFEB JTAG test",
     "DCFEBFastSignalTestForm": "DCFEB fast signal test",
     "OpticalPRBSTestForm": "Optical PRBS test",
-    "MedtermTestForm": "Med-term board-to-board IBERT test"
+    "MedtermTestForm": "Med-term board-to-board IBERT test",
+    "Step27Form": "Step 27 test"
 }
 
 

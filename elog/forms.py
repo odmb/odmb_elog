@@ -532,12 +532,40 @@ class MedtermTestForm(forms.Form):
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
 
+class Step27Form(forms.Form):
+  template_name = "board_tests/step27form.html"
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['hist_1'] = forms.BooleanField(label='ALCT: Anode Hit Occupancy per Chamber Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_2'] = forms.BooleanField(label='ALCT: Raw Hit Time Bin Occupancy Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_3'] = forms.BooleanField(label='CFEB: SCA Active Strips Occupancy Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_4'] = forms.BooleanField(label='CFEB: SCA Active Time Samples vs Strip Number Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_5'] = forms.BooleanField(label='DMB: Test01 - Binary Examiner Report Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_6'] = forms.BooleanField(label='DMB: Test04 - CFEBs DAV and Active self consistency Crate ID = 01. DMB ID = 03', required=False)
+    self.fields['hist_path'] = forms.CharField(label='Path to test results on CERN server', required=False)
+    self.fields['hist_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
+    self.fields['hist_logurl'] = forms.URLField(label=f'URL', required=False)
+  def clean(self):
+    cleaned_data = super().clean()
+    # Find filled summary fields
+    filled_summary_basenames = []
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
+    # Make sure if value is filled, that summary is filled.
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field): continue
+      value = cleaned_data[field]
+      if value:
+        field_basename = field.split('_')[0]
+        if field_basename not in filled_summary_basenames:
+          raise ValidationError(f'Please change state of "Not tested"')
+          
 class TestFilterForm(forms.Form):
   testforms_dict = {'visual inspection': VisualInspectionsForm, 'short circuit':ShortCircuitForm, 'power':PowerForm, 'clock configuration':ClockConfigurationForm, 'eeprom configuration':EEPROMConfigurationForm, 'jitter analysis': JitterAnalysisForm,
                     'vme basic test': VMEBasicTestForm, 'fpga clock test': FPGAClockTestForm, 'sysmon test': SysmonTestForm, 'prom test': PROMTestForm, 'ccb test': CCBTestForm, 'otmb test': OTMBTestForm,
-                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm, 'med-term test': MedtermTestForm}
+                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm, 'med-term test': MedtermTestForm, 'step 27 test': Step27Form}
   initial_dict = {'visual inspection': True, 'short circuit': True, 'power': True, 'clock configuration': True, 'eeprom configuration': True, 'jitter analysis': True, 'vme basic test': True, 'fpga clock test':True, 'sysmon test': True,
-                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True, 'med-term test': True}
+                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True, 'med-term test': True, 'step 27 test': True}
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     for testname in self.testforms_dict:
