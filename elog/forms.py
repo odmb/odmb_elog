@@ -55,7 +55,7 @@ from crispy_forms.layout import Layout, Submit
 class BoardFilterFormHelper(FormHelper):
   form_method = 'GET'
   layout = Layout(
-      'board_id', 'board_type', 'location', 'terragreen', 'status', 'test_query', 'test_or_query',
+      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query',
       Submit('submit', 'Apply Filter'),
   )
 

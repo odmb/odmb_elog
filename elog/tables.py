@@ -6,21 +6,43 @@ import re
 
 class BoardTable(tables.Table):
   #board_id = tables.Column(linkify=True)
+  tests_ucsb = tables.Column(empty_values=(), verbose_name="Tests at UCSB")
+  tests_b904 = tables.Column(empty_values=(), verbose_name="Tests at B904")
   def render_board_id(self, value, record):
     return format_html("<a href={}> #{} </a>", record.get_absolute_url(), value)
-  def render_tests(self, record):
-    test_summary = ''
+  def _tests_summary_for_location(self, record, location_value):
+    if record.tests is None:
+            return ""
+    logs_qs = record.log_set.filter(location_id=location_value).select_related("tests").order_by("-pk")
+    logs = list(logs_qs)
+    test_summary = ""
     for db_field in record.tests._meta.get_fields():
-      if re.search('summary(?!_)',db_field.name): 
-        test_summary += '1' if db_field.value_from_object(record.tests)==1 else '0' if db_field.value_from_object(record.tests)==0 else '-'
-        #print(db_field, db_field.value_from_object(record.tests))
-        #print(db_field.name, db_field.value_from_object(record.tests))
-    #r_summary = 1 if record.tests.r_summary else 0
-    return format_html("{}", test_summary)
+            if not hasattr(db_field, "attname"):
+                continue
+            if not re.search(r"summary(?!_)", db_field.name):
+                continue
+                
+            char = "-"
+            for log in logs:
+                if getattr(log, "tests", None) is None:
+                    continue
+                v = db_field.value_from_object(log.tests)
+                if v in (0, 1):
+                    char = "1" if v == 1 else "0"
+                    break
+            test_summary += char
+    return test_summary
+    
+  def render_tests_ucsb(self, record):
+    return format_html("{}", self._tests_summary_for_location(record, 1))
+
+  def render_tests_b904(self, record):
+    return format_html("{}", self._tests_summary_for_location(record, 5))
+
   class Meta:
     model = Board
     template_name = "django_tables2/bootstrap.html"
-    fields = ("board_type", "board_id", "location", "terragreen", "status", "tests")
+    fields = ("board_type", "board_id", "location", "terragreen", "tests_ucsb", "tests_b904")
 
 
 from django.urls import reverse
