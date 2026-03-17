@@ -6,8 +6,8 @@ import re
 
 class BoardTable(tables.Table):
   #board_id = tables.Column(linkify=True)
-  tests_ucsb = tables.Column(empty_values=(), verbose_name="Tests at UCSB")
-  tests_b904 = tables.Column(empty_values=(), verbose_name="Tests at B904")
+  tests_ucsb = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test">Tests (UCSB)</span>'), orderable=False)
+  tests_b904 = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test">Tests (B904)</span>'), orderable=False)
   def render_board_id(self, value, record):
     return format_html("<a href={}> #{} </a>", record.get_absolute_url(), value)
   def _tests_summary_for_location(self, record, location_value):
