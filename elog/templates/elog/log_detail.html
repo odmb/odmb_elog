@@ -5,8 +5,9 @@
 
   <p><strong>Board: </strong><a href="{{ log.board.get_absolute_url }}">{{ log.board }}</a></p> 
   <p><strong>Date: </strong>{{ log.date }}</p> 
-  <p><strong>Board Location: </strong>{{ log.location }}</p> 
-  <p><strong>File: </strong>{{ log.file }}</p> 
+  <p><strong>Board Location: </strong>{{ log.location }}</p>
+  <p><strong>R455 Replaced?: </strong>{{ log.r455_replaced }}</p> 
+  <p><strong>File: </strong>{{ log.file }}</p>
   <p><strong>Log: </strong>{{ log.text }}</p> 
   <p><strong>Status: </strong>{{ log.status }}</p> 
   <p><strong>Tests: </strong>{{ log.tests.r_summary }}</p> 

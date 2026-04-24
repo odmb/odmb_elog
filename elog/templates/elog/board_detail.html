@@ -4,7 +4,10 @@
   <h1>Title: {{ board }}</h1>
 
   <p><strong>Location: </strong>{{ board.location }}</p>
-  <p><strong>TerraGreen: </strong>{{ board.terragreen }}</p> 
+  <p><strong>TerraGreen: </strong>{{ board.terragreen }}</p>
+  <p><strong>Compunetics ID: </strong>{{ board.batch_id }}-{{ board.date_code }}-{{ board.serial_number }}</p>
+  <p><small>Format: batch ID - date code - serial number</small></p>
+  <p><strong>R455 replaced: </strong>{{ board.r455_replaced }}</p>
   <p><strong>Status: </strong>{{ board.status }}</p>
   <p><strong>Tests: </strong>{{ log.tests.r_summary }}</p> 
   {% for testform in testforms %}

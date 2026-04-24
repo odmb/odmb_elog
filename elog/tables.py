@@ -42,7 +42,7 @@ class BoardTable(tables.Table):
   class Meta:
     model = Board
     template_name = "django_tables2/bootstrap.html"
-    fields = ("board_type", "board_id", "location", "terragreen", "tests_ucsb", "tests_b904")
+    fields = ("board_type", "board_id", "location", "terragreen", "r455_replaced", "tests_ucsb", "tests_b904")
 
 
 from django.urls import reverse

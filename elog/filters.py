@@ -17,7 +17,7 @@ class BoardFilter(django_filters.FilterSet):
   
   class Meta:
     model = Board
-    fields = ['board_id', 'board_type', 'location', 'terragreen']
+    fields = ['board_id', 'board_type', 'location', 'terragreen', 'r455_replaced']
   def _summary_field_names(self):
     names = []
     for db_field in Tests._meta.get_fields():

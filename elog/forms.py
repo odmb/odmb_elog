@@ -48,14 +48,14 @@ class LogForm(forms.ModelForm):
   board = BoardChoiceField()
   class Meta:
     model = Log
-    fields = ['board', 'date', 'location', 'file', 'text', 'status']
+    fields = ['board', 'date', 'location', 'r455_replaced', 'file', 'text', 'status']
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 class BoardFilterFormHelper(FormHelper):
   form_method = 'GET'
   layout = Layout(
-      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query',
+      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query', 'r455_replaced', 
       Submit('submit', 'Apply Filter'),
   )
 
@@ -64,7 +64,7 @@ class LogFilterFormHelper(FormHelper):
   help_text_inline = True
   board_query = forms.CharField()
   layout = Layout(
-      'board_query', 'location', 'status', 'date', 'query', 'test_query', 'test_or_query',
+      'board_query', 'location', 'status', 'r455_replaced', 'date', 'query', 'test_query', 'test_or_query',
       Submit('submit', 'Apply Filter'),
   )
 
@@ -92,7 +92,7 @@ class BoardTestForm(forms.ModelForm):
   board = BoardChoiceField()
   class Meta:
     model = Log
-    fields = ['board', 'date', 'location', 'text']
+    fields = ['board', 'date', 'location', 'r455_replaced', 'text']
 
 class VisualInspectionsForm(forms.Form):
   template_name = "board_tests/visualinspectionform.html"

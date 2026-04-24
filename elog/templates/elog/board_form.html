@@ -4,6 +4,9 @@
 {% block content %}
   <form action="" method="post">
     {% csrf_token %}
+    <p class="text-muted">
+      The batch ID, date code, and serial number are located on the lower-left front of the board, usually next to the T12/R12 and B04 ports.
+    </p>
     <table>
     {{ form|crispy }}
     </table>

@@ -23,8 +23,8 @@ class TestsInline(admin.TabularInline):
 
 @admin.register(Board)
 class BoardAdmin(admin.ModelAdmin):
-  list_display = ('board_type', 'board_id', 'location', 'terragreen')
-  list_filter = ('board_type', 'status', 'location', 'terragreen')
+  list_display = ('board_type', 'board_id', 'location', 'terragreen', 'r455_replaced')
+  list_filter = ('board_type', 'location', 'terragreen', 'r455_replaced')
   inlines = [LogInline]
 
 @admin.register(Log)
