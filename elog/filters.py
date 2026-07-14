@@ -98,7 +98,7 @@ class LogFilter(django_filters.FilterSet):
   test_or_query = django_filters.CharFilter(method='test_search_or', label="Tests (OR)", widget=TextInput(attrs={'placeholder': ''.join(['*']*ntests)}))
   class Meta:
     model = Log
-    fields = ['board_query', 'location', 'status', 'query', 'date']
+    fields = ['board_query', 'location', 'status', 'r455_replaced', 'query', 'date']
 
   def universal_search(self, queryset, name, value):
     #return Log.objects.filter(
