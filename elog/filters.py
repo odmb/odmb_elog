@@ -17,7 +17,7 @@ class BoardFilter(django_filters.FilterSet):
   
   class Meta:
     model = Board
-    fields = ['board_id', 'board_type', 'location', 'terragreen', 'r455_replaced']
+    fields = ['board_id', 'board_type', 'location', 'terragreen', 'r455_replaced', 'storage_box']
   def _summary_field_names(self):
     names = []
     for db_field in Tests._meta.get_fields():
@@ -98,7 +98,7 @@ class LogFilter(django_filters.FilterSet):
   test_or_query = django_filters.CharFilter(method='test_search_or', label="Tests (OR)", widget=TextInput(attrs={'placeholder': ''.join(['*']*ntests)}))
   class Meta:
     model = Log
-    fields = ['board_query', 'location', 'status', 'r455_replaced', 'query', 'date']
+    fields = ['board_query', 'location', 'status', 'r455_replaced', 'query', 'date', 'storage_box']
 
   def universal_search(self, queryset, name, value):
     #return Log.objects.filter(

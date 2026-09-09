@@ -6,8 +6,8 @@ import re
 
 class BoardTable(tables.Table):
   #board_id = tables.Column(linkify=True)
-  tests_ucsb = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test">Tests at UCSB<br><small>Hover for full details</small></span>'), orderable=False)
-  tests_b904 = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test">Tests at B904<br><small>Hover for full details</small></span>'), orderable=False)
+  tests_ucsb = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test | 19: DL fix verification">Tests at UCSB<br><small>Hover for full details</small></span>'), orderable=False)
+  tests_b904 = tables.Column(empty_values=(), verbose_name=format_html('<span title="1: Visual inspection | 2: Short circuit test | 3: Power test | 4: Clock configuration | 5: EEPROM configuration | 6: Jitter analysis | 7: Basic VME test | 8: FPGA clock test | 9: System monitoring test | 10: PROM test | 11: CCB test | 12: OTMB test | 13: LVMB/LVMB7 test | 14: DCFEB JTAG test | 15: DCFEB fast signal test | 16: Optical PRBS test | 17: Med-term IBERT | 18: Step 27 test | 19: DL fix verification">Tests at B904<br><small>Hover for full details</small></span>'), orderable=False)
   def render_board_id(self, value, record):
     return format_html("<a href={}> #{} </a>", record.get_absolute_url(), value)
   def _tests_summary_for_location(self, record, location_value):
@@ -42,7 +42,7 @@ class BoardTable(tables.Table):
   class Meta:
     model = Board
     template_name = "django_tables2/bootstrap.html"
-    fields = ("board_type", "board_id", "location", "terragreen", "r455_replaced", "tests_ucsb", "tests_b904")
+    fields = ("board_type", "board_id", "location", "terragreen", "r455_replaced", "storage_box", "tests_ucsb", "tests_b904")
 
 
 from django.urls import reverse
@@ -78,4 +78,4 @@ class LogTable(tables.Table):
   class Meta:
     model = Log
     template_name = "django_tables2/bootstrap.html"
-    fields = ("id", "board", "date", "text", "location", "tests", "edit", "delete")
+    fields = ("id", "board", "date", "text", "location", "storage_box", "tests", "edit", "delete")

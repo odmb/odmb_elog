@@ -50,6 +50,8 @@ class Board(models.Model):
   r455_replaced_log_id = models.IntegerField(null=True, blank=True)
   status = models.ForeignKey('BoardStatus', on_delete=models.SET_NULL, null=True, blank=True)
   tests = models.OneToOneField('Tests', on_delete=models.SET_NULL, null=True, blank=True)
+  storage_box = models.CharField(max_length=200, null=True, blank=True, help_text="Enter B904 storage box number")
+  storage_box_log_id = models.IntegerField(null=True, blank=True)
 
   def get_absolute_url(self):
     """Returns the URL to access a particular instance of the model."""
@@ -84,6 +86,7 @@ class Log(models.Model):
   date = models.DateTimeField(default=get_now, help_text="Format is YYYY-MM-DD HH:MM")
   location = models.ForeignKey('Location', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="board location")
   r455_replaced = models.BooleanField(default=False)
+  storage_box = models.CharField(max_length=200, null=True, blank=True, help_text="Enter B904 storage box number")
   file = models.FileField(null=True, blank=True)
   text = models.TextField(null=True, blank=True, verbose_name="log")
   status = models.ForeignKey('BoardStatus', on_delete=models.SET_NULL, null=True, blank=True)
@@ -483,6 +486,14 @@ class Tests(models.Model):
   #Summary checkbox
   hist_summary = models.IntegerField(null=True, blank=True)
   hist_summary_log_id = models.IntegerField(null=True, blank=True)
+  ################################################
+
+  ##DL fix verification
+  dlfix_verified = models.BooleanField(null=True, blank=True)
+
+  #Summary checkbox
+  dlfix_summary = models.IntegerField(null=True, blank=True)
+  dlfix_summary_log_id = models.IntegerField(null=True, blank=True)
   ################################################
 
 

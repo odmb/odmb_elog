@@ -138,6 +138,7 @@ class LogCreate(CreateView):
     self.object = form.save()
     self.object.board.location = self.object.location
     self.object.board.r455_replaced = self.object.r455_replaced
+    if self.object.storage_box: self.object.board.storage_box = self.object.storage_box
     self.object.board.save()
     return HttpResponseRedirect(self.get_success_url())
 
@@ -148,7 +149,7 @@ class LogDelete(DeleteView):
 
 class BoardCreate(CreateView):
   model = Board
-  fields = ['board_id', 'board_type', 'location', 'terragreen', 'batch_id', 'date_code', 'serial_number', 'r455_replaced']
+  fields = ['board_id', 'board_type', 'location', 'terragreen', 'batch_id', 'date_code', 'serial_number', 'r455_replaced', 'storage_box']
   def form_valid(self, form):
     self.object = form.save()
     return HttpResponseRedirect(self.get_success_url())
@@ -175,7 +176,8 @@ testform_display_names = {
     "DCFEBFastSignalTestForm": "DCFEB fast signal test",
     "OpticalPRBSTestForm": "Optical PRBS test",
     "MedtermTestForm": "Med-term board-to-board IBERT test",
-    "Step27Form": "Step 27 test"
+    "Step27Form": "Step 27 test",
+    "DLFixVerificationForm": "DL fix verification",
 }
 
 
@@ -229,6 +231,7 @@ def get_boardtest(request, *args, **kwargs):
       date_obj = form.cleaned_data['date']
       location_obj = form.cleaned_data['location']
       r455_replaced_obj = form.cleaned_data['r455_replaced']
+      storage_box_obj = form.cleaned_data['storage_box']
       text_obj = form.cleaned_data['text']
       # Fill form data
       form_data = {}
@@ -245,13 +248,16 @@ def get_boardtest(request, *args, **kwargs):
       #print('test_form: ',form_data)
       tests_obj = Tests(**form_data)
       tests_obj.save()
-      log_obj = Log(board=board_obj, date=date_obj, location=location_obj, r455_replaced=r455_replaced_obj, tests=tests_obj, text=text_obj)
+      log_obj = Log(board=board_obj, date=date_obj, location=location_obj, r455_replaced=r455_replaced_obj, storage_box=storage_box_obj, tests=tests_obj, text=text_obj)
       log_obj.save()
       # Update objects in db
       board_obj.location_log_id = log_obj.id
       board_obj.location = location_obj
       board_obj.r455_replaced_log_id = log_obj.id
       board_obj.r455_replaced = r455_replaced_obj
+      if storage_box_obj:
+      	board_obj.storage_box_log_id = log_obj.id
+      	board_obj.storage_box = storage_box_obj
       board_obj.save()
       #print(board_obj.pk)
       #print('pre',tests_obj.r_summary_log_id)
@@ -362,6 +368,7 @@ def update_boardtest(request, *args, **kwargs):
         date_obj = form.cleaned_data['date']
         location_obj = form.cleaned_data['location']
         r455_replaced_obj = form.cleaned_data['r455_replaced']
+        storage_box_obj = form.cleaned_data['storage_box']
         text_obj = form.cleaned_data['text']
         # Fill form data
         form_data = {}
@@ -392,6 +399,7 @@ def update_boardtest(request, *args, **kwargs):
         log_obj.date = date_obj
         log_obj.location = location_obj
         log_obj.r455_replaced = r455_replaced_obj
+        log_obj.storage_box = storage_box_obj
         log_obj.text = text_obj
         log_obj.save()
         #Log.objects.filter(pk=log_id).update(board=board_obj, date=date_obj, location=location_obj, text=text_obj)
@@ -407,6 +415,9 @@ def update_boardtest(request, *args, **kwargs):
             board_obj.save()
         if log_obj.id == board_obj.r455_replaced_log_id:
             board_obj.r455_replaced = r455_replaced_obj
+            board_obj.save()
+        if log_obj.id == board_obj.storage_box_log_id and storage_box_obj:
+            board_obj.storage_box = storage_box_obj
             board_obj.save()
         # Update board status if test_log_id == log_obj.id
         modified_test_basenames = []
