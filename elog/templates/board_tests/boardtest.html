@@ -58,6 +58,11 @@ function htmlDecode(input) {
       <p></p>
     </div>
     <div>
+      {{ form.storage_box.label_tag }} {{ form.storage_box }}
+      {{ form.storage_box.errors }}
+      <p></p>
+    </div>
+    <div>
       {{ form.text.label_tag }} <br>
       {{ form.text }}
       {{ form.text.errors }}

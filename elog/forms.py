@@ -48,14 +48,14 @@ class LogForm(forms.ModelForm):
   board = BoardChoiceField()
   class Meta:
     model = Log
-    fields = ['board', 'date', 'location', 'r455_replaced', 'file', 'text', 'status']
+    fields = ['board', 'date', 'location', 'r455_replaced', 'storage_box', 'file', 'text', 'status']
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 class BoardFilterFormHelper(FormHelper):
   form_method = 'GET'
   layout = Layout(
-      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query', 'r455_replaced', 
+      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query', 'r455_replaced', 'storage_box', 
       Submit('submit', 'Apply Filter'),
   )
 
@@ -64,7 +64,7 @@ class LogFilterFormHelper(FormHelper):
   help_text_inline = True
   board_query = forms.CharField()
   layout = Layout(
-      'board_query', 'location', 'status', 'r455_replaced', 'date', 'query', 'test_query', 'test_or_query',
+      'board_query', 'location', 'status', 'r455_replaced', 'storage_box', 'date', 'query', 'test_query', 'test_or_query',
       Submit('submit', 'Apply Filter'),
   )
 
@@ -92,7 +92,7 @@ class BoardTestForm(forms.ModelForm):
   board = BoardChoiceField()
   class Meta:
     model = Log
-    fields = ['board', 'date', 'location', 'r455_replaced', 'text']
+    fields = ['board', 'date', 'location', 'r455_replaced', 'storage_box', 'text']
 
 class VisualInspectionsForm(forms.Form):
   template_name = "board_tests/visualinspectionform.html"
@@ -384,6 +384,26 @@ class CCBTestForm(forms.Form):
         if field_basename not in filled_summary_basenames:
           raise ValidationError(f'Please change state of "Not tested"')
 
+class DLFixVerificationForm(forms.Form):
+  template_name = "board_tests/dlfixverification.html"
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields[f'dlfix_verified'] = forms.BooleanField(label=f'DL fix verified', required=False)
+    self.fields[f'dlfix_summary'] = forms.TypedChoiceField(label='Pass test', required=False, choices=((-1,"Not tested"),(1,"Pass"),(0,"Fail")), coerce=int, empty_value=None, initial=-1)
+    self.fields[f'dlfix_logurl'] = forms.URLField(label=f'URL', required=False)
+  def clean(self):
+    cleaned_data = super().clean()
+    filled_summary_basenames = []
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field) and cleaned_data[field] != -1: filled_summary_basenames.append(field.split('_')[0])
+    for field in cleaned_data:
+      if re.search('summary(?!_)',field): continue
+      value = cleaned_data[field]
+      if value:
+        field_basename = field.split('_')[0]
+        if field_basename not in filled_summary_basenames:
+          raise ValidationError(f'Please change state of "Not tested"')
+
 class OTMBTestForm(forms.Form):
   template_name = "board_tests/otmbtest.html"
   def __init__(self, *args, **kwargs):
@@ -563,9 +583,9 @@ class Step27Form(forms.Form):
 class TestFilterForm(forms.Form):
   testforms_dict = {'visual inspection': VisualInspectionsForm, 'short circuit':ShortCircuitForm, 'power':PowerForm, 'clock configuration':ClockConfigurationForm, 'eeprom configuration':EEPROMConfigurationForm, 'jitter analysis': JitterAnalysisForm,
                     'vme basic test': VMEBasicTestForm, 'fpga clock test': FPGAClockTestForm, 'sysmon test': SysmonTestForm, 'prom test': PROMTestForm, 'ccb test': CCBTestForm, 'otmb test': OTMBTestForm,
-                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm, 'med-term test': MedtermTestForm, 'step 27 test': Step27Form}
+                    'lvmb test': LVMBTestForm, 'dcfeb jtag test': DCFEBJTAGTestForm, 'dcfeb fast signal test': DCFEBFastSignalTestForm, 'optical prbs test': OpticalPRBSTestForm, 'med-term test': MedtermTestForm, 'step 27 test': Step27Form, 'dl fix verification': DLFixVerificationForm}
   initial_dict = {'visual inspection': True, 'short circuit': True, 'power': True, 'clock configuration': True, 'eeprom configuration': True, 'jitter analysis': True, 'vme basic test': True, 'fpga clock test':True, 'sysmon test': True,
-                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True, 'med-term test': True, 'step 27 test': True}
+                  'prom test': True, 'ccb test': True, 'otmb test': True, 'lvmb test': True, 'dcfeb jtag test': True, 'dcfeb fast signal test': True, 'optical prbs test': True, 'med-term test': True, 'step 27 test': True, 'dl fix verification': True}
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     for testname in self.testforms_dict:
