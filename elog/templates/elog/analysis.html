@@ -1,0 +1,184 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<style>
+  .analysis-form fieldset { margin-bottom: 1rem; }
+  .analysis-form ul { list-style: none; padding-left: 0; columns: 2; }
+  .analysis-form #id_site { columns: 1; }
+  .analysis-form li { break-inside: avoid; margin-bottom: .2rem; }
+  .analysis-actions { margin: 1rem 0 1.5rem; }
+  .analysis-summary { margin-bottom: 1rem; }
+  .analysis-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+  .analysis-swatch { display: inline-block; width: .85rem; height: .85rem; margin-right: .3rem; vertical-align: -.05rem; }
+  .result-pass { background: #198754; }
+  .result-fail { background: #dc3545; }
+  .result-not-tested { background: #6c757d; }
+  .status-fully-tested { background: #198754; }
+  .status-not-fully-tested { background: #6c757d; }
+  .status-under-debugging { background: #dc3545; }
+  .status-under-repairing { background: #fd7e14; }
+  .status-test-stand { background: #6f42c1; }
+  .analysis-chart { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2.5rem; min-height: 360px; padding: 1rem 1rem 0; border-left: 1px solid #adb5bd; border-bottom: 1px solid #adb5bd; }
+  .analysis-group { min-width: min(100%, 440px); flex: 1 1 440px; text-align: center; }
+  .analysis-bars { height: 290px; display: flex; justify-content: center; align-items: flex-end; gap: .75rem; }
+  .analysis-bar-column { width: 92px; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+  .analysis-total { min-height: 1.5rem; font-weight: 600; }
+  .analysis-stack { display: flex; flex-direction: column-reverse; width: 100%; min-height: 1px; }
+  .analysis-segment { display: flex; align-items: center; justify-content: center; color: white; min-height: 0; overflow: hidden; font-size: .8rem; }
+  .analysis-family { margin-top: .4rem; font-size: .85rem; line-height: 1.15; overflow-wrap: anywhere; }
+  .analysis-count-columns { display: flex; justify-content: center; align-items: flex-start; gap: .75rem; margin-top: .5rem; }
+  .analysis-count-column { width: 92px; min-width: 0; display: grid; gap: .25rem; font-size: .75rem; line-height: 1.15; }
+  .analysis-count-column a { overflow-wrap: anywhere; }
+  .analysis-group-label { margin-top: .7rem; font-weight: 600; overflow-wrap: anywhere; }
+  .analysis-empty { padding: 2rem 0; }
+  .portion-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #adb5bd; }
+  .portion-chart { display: grid; gap: 1rem; margin-top: 1rem; }
+  .portion-axis { margin-left: 195px; display: flex; justify-content: space-between; color: #6c757d; border-bottom: 1px solid #adb5bd; padding-bottom: .25rem; }
+  .portion-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: .3rem 1rem; align-items: center; }
+  .portion-label { text-align: right; overflow-wrap: anywhere; }
+  .portion-track { display: flex; height: 2rem; background: #e9ecef; }
+  .portion-segment { min-width: 0; }
+  .portion-values { grid-column: 2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1rem; color: #495057; font-size: .85rem; }
+  .portion-values strong { color: inherit; }
+  .errorlist { color: #b02a37; }
+  @media (max-width: 600px) {
+    .analysis-form ul { columns: 1; }
+    .analysis-chart { gap: 1rem; padding-left: .25rem; padding-right: .25rem; }
+    .analysis-bars { gap: .35rem; }
+    .analysis-bar-column { width: 23%; }
+    .analysis-count-column { width: 23%; }
+    .analysis-family { font-size: .72rem; }
+    .portion-axis { margin-left: 0; }
+    .portion-row { grid-template-columns: 1fr; }
+    .portion-label { text-align: left; }
+    .portion-values { grid-column: 1; }
+  }
+</style>
+
+<h1>Board Test Analysis</h1>
+<h2 class="h3">Combined board status</h2>
+<form method="get" class="analysis-form">
+  <fieldset>
+    <legend class="h5">{{ form.site.label }}</legend>
+    {{ form.site.errors }}{{ form.site }}
+  </fieldset>
+  <fieldset>
+    <legend class="h5">{{ form.board_types.label }}</legend>
+    {{ form.board_types.errors }}{{ form.board_types }}
+  </fieldset>
+  <div>
+    {{ form.grouping.label_tag }} {{ form.grouping }} {{ form.grouping.errors }}
+  </div>
+  <div class="analysis-actions">
+    <button type="submit" class="btn btn-primary" name="chart" value="summary">Create histogram</button>
+  </div>
+</form>
+
+{% if chart_groups %}
+  <div class="analysis-summary">
+    <strong>{{ total_boards }}</strong> board{{ total_boards|pluralize }} shown. Each board is counted once.
+  </div>
+  <div class="analysis-legend">
+    {% for status in status_legend %}
+      <span><i class="analysis-swatch {{ status.css_class }}"></i>{{ status.label }}</span>
+    {% endfor %}
+  </div>
+  <div class="analysis-chart" aria-label="Board test results histogram">
+    {% for group in chart_groups %}
+      <div class="analysis-group">
+        <div class="analysis-bars">
+          {% for bar in group.bars %}
+            <div class="analysis-bar-column" aria-label="{{ group.label }}, {{ bar.label }}: {{ bar.total }} boards">
+              <div class="analysis-total">{{ bar.total }}</div>
+              <div class="analysis-stack" style="height: {{ bar.height }}%;">
+                {% for segment in bar.segments %}
+                  <div class="analysis-segment {{ segment.css_class }}" style="height: {{ segment.height }}%;" title="{{ segment.label }}: {{ segment.count }}">{{ segment.count }}</div>
+                {% endfor %}
+              </div>
+              <div class="analysis-family">{{ bar.label }}</div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="analysis-count-columns" aria-label="Links to boards in each status">
+          {% for bar in group.bars %}
+            <div class="analysis-count-column">
+              {% for segment in bar.segments %}
+                <a href="{{ segment.url }}" target="_blank" rel="noopener">{{ segment.label }}: {{ segment.count }}</a>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="analysis-group-label">{{ group.label }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% elif form.is_bound and form.is_valid %}
+  <p class="analysis-empty">No boards matched this analysis.</p>
+{% endif %}
+
+<section class="portion-section">
+  <h2 class="h3">Results by individual test</h2>
+  <form method="get" class="analysis-form">
+    <fieldset>
+      <legend class="h5">{{ portion_form.site.label }}</legend>
+      {{ portion_form.site.errors }}{{ portion_form.site }}
+    </fieldset>
+    <fieldset>
+      <legend class="h5">{{ portion_form.board_types.label }}</legend>
+      {{ portion_form.board_types.errors }}{{ portion_form.board_types }}
+    </fieldset>
+    <fieldset>
+      <legend class="h5">{{ portion_form.locations.label }}</legend>
+      {{ portion_form.locations.errors }}{{ portion_form.locations }}
+    </fieldset>
+    <fieldset>
+      <legend class="h5">{{ portion_form.terragreens.label }}</legend>
+      {{ portion_form.terragreens.errors }}{{ portion_form.terragreens }}
+    </fieldset>
+    <fieldset>
+      <legend class="h5">{{ portion_form.tests.label }}</legend>
+      {{ portion_form.tests.errors }}{{ portion_form.tests }}
+    </fieldset>
+    <fieldset>
+      <legend class="h5">{{ portion_form.display_mode.label }}</legend>
+      {{ portion_form.display_mode.errors }}{{ portion_form.display_mode }}
+    </fieldset>
+    <div class="analysis-actions">
+      <button type="submit" class="btn btn-primary" name="chart" value="portion">Create horizontal chart</button>
+    </div>
+  </form>
+
+  {% if portion_rows %}
+    <div class="analysis-summary">
+      Results for <strong>{{ portion_total_boards }}</strong> matching board{{ portion_total_boards|pluralize }}.
+    </div>
+    <div class="analysis-legend">
+      <span><i class="analysis-swatch result-pass"></i>Passed</span>
+      <span><i class="analysis-swatch result-fail"></i>Failed</span>
+      <span><i class="analysis-swatch result-not-tested"></i>Not tested</span>
+    </div>
+    <div class="portion-chart" aria-label="Results for each selected test">
+      <div class="portion-axis" aria-hidden="true">
+        {% for tick in portion_axis_ticks %}<span>{{ tick }}</span>{% endfor %}
+      </div>
+      {% for row in portion_rows %}
+        <div class="portion-row" aria-label="{{ row.label }}: {{ row.counts.pass }} passed, {{ row.counts.fail }} failed, {{ row.counts.not_tested }} not tested">
+          <div class="portion-label">{{ row.label }}</div>
+          <div class="portion-track">
+            <div class="portion-segment result-pass" style="width: {{ row.widths.pass }}%;" title="Passed: {{ row.values.pass }}"></div>
+            <div class="portion-segment result-fail" style="width: {{ row.widths.fail }}%;" title="Failed: {{ row.values.fail }}"></div>
+            <div class="portion-segment result-not-tested" style="width: {{ row.widths.not_tested }}%;" title="Not tested: {{ row.values.not_tested }}"></div>
+          </div>
+          <div class="portion-values">
+            <a href="{{ row.urls.pass }}" target="_blank" rel="noopener">Passed: <strong>{{ row.values.pass }}</strong></a>
+            <a href="{{ row.urls.fail }}" target="_blank" rel="noopener">Failed: <strong>{{ row.values.fail }}</strong></a>
+            <a href="{{ row.urls.not_tested }}" target="_blank" rel="noopener">Not tested: <strong>{{ row.values.not_tested }}</strong></a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% elif portion_form.is_bound and portion_form.is_valid %}
+    <p class="analysis-empty">No boards matched these filters.</p>
+  {% endif %}
+</section>
+{% endblock %}

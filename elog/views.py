@@ -183,6 +183,7 @@ testform_display_names = {
 
 # Make a view for update boardtest
 from .forms import BoardTestForm, TestFilterForm
+from .analysis_views import analysis
 def get_boardtest(request, *args, **kwargs):
   # Setup filter
   testforms_view = []
@@ -306,6 +307,14 @@ def get_boardtest(request, *args, **kwargs):
       if is_board_obj_modified: 
         print('Trying to save board obj')
         board_obj.tests.save()
+
+      # Optionally update the current board status for the site where this log
+      # was created. Automatic-update settings remain admin-only.
+      status_update = form.cleaned_data.get('test_status_update')
+      if status_update:
+        status_field = 'ucsb_test_status' if location_obj.pk == 1 else 'b904_test_status'
+        setattr(board_obj, status_field, status_update)
+        board_obj.save(update_fields=[status_field])
       #Board.objects.filter(pk=board_obj.pk).update()
 
       #print(form.cleaned_data['picture'].image)
@@ -332,7 +341,7 @@ def update_boardtest(request, *args, **kwargs):
 
   if request.method == 'POST':
     # Fill form
-    form = BoardTestForm(request.POST, request.FILES, instance=log_obj, prefix='boardtest')
+    form = BoardTestForm(request.POST, request.FILES, instance=log_obj, prefix='boardtest', lock_board=True)
     testfilter = TestFilterForm(request.POST, prefix='testfilter')
     # Fill filter form
     if testfilter.is_valid():
@@ -364,7 +373,8 @@ def update_boardtest(request, *args, **kwargs):
      
         if popup_errors or not form.is_valid() or not forms_valid:
             return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly, 'popup_errors': popup_errors})
-        board_obj = form.cleaned_data['board']
+        # Existing logs must remain associated with their original board.
+        board_obj = log_obj.board
         date_obj = form.cleaned_data['date']
         location_obj = form.cleaned_data['location']
         r455_replaced_obj = form.cleaned_data['r455_replaced']
@@ -395,7 +405,6 @@ def update_boardtest(request, *args, **kwargs):
 
         tests_obj.save()
         #print(Tests.objects.get(pk=test_id).r_summary)
-        log_obj.board = board_obj
         log_obj.date = date_obj
         log_obj.location = location_obj
         log_obj.r455_replaced = r455_replaced_obj
@@ -453,8 +462,8 @@ def update_boardtest(request, *args, **kwargs):
             break
       testforms_view.append(form)
       testforms_initial[testform_name] = True
-    boardtest_initial = {'board':log_obj.board, 'date':log_obj.date, 'location':log_obj.location, 'r455_replaced':log_obj.r455_replaced, 'text':log_obj.text}
+    boardtest_initial = {'board':log_obj.board, 'date':log_obj.date, 'location':log_obj.location, 'r455_replaced':log_obj.r455_replaced, 'storage_box':log_obj.storage_box, 'text':log_obj.text}
     # Fill form
-    form = BoardTestForm(prefix='boardtest', initial=boardtest_initial)
+    form = BoardTestForm(prefix='boardtest', instance=log_obj, initial=boardtest_initial, lock_board=True)
     testfilter = TestFilterForm(prefix='testfilter', initial=testforms_initial)
   return render(request, 'board_tests/boardtest.html', {'form':form, 'testforms': testforms_view, 'testfilter':testfilter, 'readonly': readonly})

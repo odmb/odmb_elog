@@ -1,7 +1,7 @@
 import django_filters
 from .models import BoardType, Board, Location, Log, BoardStatus, Tests
 from django.db.models import Q
-from django.forms.widgets import TextInput
+from django.forms.widgets import HiddenInput, TextInput
 import re
 
 class BoardFilter(django_filters.FilterSet):
@@ -13,6 +13,16 @@ class BoardFilter(django_filters.FilterSet):
   test_ucsb_or_query = django_filters.CharFilter(method='test_search_ucsb_or', label="Tests at UCSB (OR)", widget=TextInput(attrs={'placeholder': ''.join(['*'] * ntests)}))
   test_b904_query = django_filters.CharFilter(method='test_search_b904', label="Tests at B904 (AND)", widget=TextInput(attrs={'placeholder': ''.join(['*'] * ntests)}))
   test_b904_or_query = django_filters.CharFilter(method='test_search_b904_or', label="Tests at B904 (OR)", widget=TextInput(attrs={'placeholder': ''.join(['*'] * ntests)}))
+  analysis_status = django_filters.CharFilter(method='analysis_status_search', widget=HiddenInput)
+  analysis_result = django_filters.CharFilter(method='analysis_result_search', widget=HiddenInput)
+  analysis_site = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_board_type = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_board_types = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_grouping = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_group = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_test = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_locations = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
+  analysis_terragreens = django_filters.CharFilter(method='analysis_passthrough', widget=HiddenInput)
   
   
   class Meta:
@@ -86,6 +96,63 @@ class BoardFilter(django_filters.FilterSet):
 
   def test_search_b904_or(self, queryset, name, value):
     return self._filter_by_location_pattern(queryset, value, location_id=5, use_or=True)
+
+  def analysis_passthrough(self, queryset, name, value):
+    return queryset
+
+  def analysis_status_search(self, queryset, name, value):
+    site = self.data.get('analysis_site')
+    if site not in ('ucsb', 'b904'):
+      return queryset.none()
+    queryset = queryset.filter(**{f'{site}_test_status': value})
+
+    board_type = self.data.get('analysis_board_type', '')
+    if board_type.isdigit():
+      queryset = queryset.filter(board_type_id=int(board_type))
+
+    grouping = self.data.get('analysis_grouping')
+    group = self.data.get('analysis_group')
+    if grouping == 'location':
+      queryset = queryset.filter(location__isnull=True) if group == 'none' else queryset.filter(location_id=group)
+    elif grouping == 'terragreen':
+      queryset = queryset.filter(terragreen__isnull=True) if group == 'none' else queryset.filter(terragreen_id=group)
+    return queryset
+
+  def _apply_analysis_choices(self, queryset, field_name, raw_value):
+    values = [value for value in raw_value.split(',') if value]
+    ids = [int(value) for value in values if value.isdigit()]
+    query = Q(**{f'{field_name}__in': ids})
+    if 'none' in values:
+      query |= Q(**{f'{field_name.rsplit("_id", 1)[0]}__isnull': True})
+    return queryset.filter(query)
+
+  def analysis_result_search(self, queryset, name, value):
+    site = self.data.get('analysis_site')
+    test_field = self.data.get('analysis_test')
+    if site not in ('ucsb', 'b904') or test_field not in self._summary_field_names():
+      return queryset.none()
+    if value not in ('pass', 'fail', 'not_tested'):
+      return queryset.none()
+
+    board_types = self.data.get('analysis_board_types', '')
+    board_type_ids = [int(item) for item in board_types.split(',') if item.isdigit()]
+    queryset = queryset.filter(board_type_id__in=board_type_ids)
+    queryset = self._apply_analysis_choices(queryset, 'location_id', self.data.get('analysis_locations', ''))
+    queryset = self._apply_analysis_choices(queryset, 'terragreen_id', self.data.get('analysis_terragreens', ''))
+
+    location_id = 1 if site == 'ucsb' else 5
+    matched_ids = []
+    for board in queryset:
+      result = 'not_tested'
+      logs = board.log_set.filter(location_id=location_id, tests__isnull=False).select_related('tests').order_by('-pk')
+      for log in logs:
+        test_value = getattr(log.tests, test_field, None)
+        if test_value in (0, 1):
+          result = 'pass' if test_value == 1 else 'fail'
+          break
+      if result == value:
+        matched_ids.append(board.pk)
+    return queryset.filter(pk__in=matched_ids)
 
 class LogFilter(django_filters.FilterSet):
   date = django_filters.DateFromToRangeFilter(widget=django_filters.widgets.RangeWidget(attrs={'placeholder': 'YYYY-MM-DD'}))

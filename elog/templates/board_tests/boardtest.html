@@ -62,6 +62,17 @@ function htmlDecode(input) {
       {{ form.storage_box.errors }}
       <p></p>
     </div>
+    {% if form.test_status_update %}
+    <div>
+      <strong>{{ form.test_status_update.label }}</strong><br>
+      {{ form.test_status_update }}
+      {% if form.test_status_update.help_text %}
+        <p class="help">{{ form.test_status_update.help_text }}</p>
+      {% endif %}
+      {{ form.test_status_update.errors }}
+      <p></p>
+    </div>
+    {% endif %}
     <div>
       {{ form.text.label_tag }} <br>
       {{ form.text }}

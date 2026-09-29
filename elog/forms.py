@@ -1,5 +1,5 @@
 from django import forms
-from .models import BoardType, Board, Location, Log, BoardStatus
+from .models import BoardType, Board, Location, TerraGreen, Log, BoardStatus
 import re
 
 # reference: https://stackoverflow.com/questions/12026721/django-form-clean-foreignkey-with-to-field-value
@@ -55,7 +55,7 @@ from crispy_forms.layout import Layout, Submit
 class BoardFilterFormHelper(FormHelper):
   form_method = 'GET'
   layout = Layout(
-      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query', 'r455_replaced', 'storage_box', 
+      'board_id', 'board_type', 'location', 'terragreen', 'test_ucsb_query', 'test_ucsb_or_query', 'test_b904_query', 'test_b904_or_query', 'r455_replaced', 'storage_box',
       Submit('submit', 'Apply Filter'),
   )
 
@@ -84,11 +84,157 @@ def validate_board_id(value):
     raise forms.ValidationError(f"board_type={in_board_type} with board_id={in_board_id} can not be found")
 
 import datetime
+
+ANALYSIS_TEST_CHOICES = (
+  ('picture_summary', 'Visual inspection'),
+  ('r_summary', 'Short circuit test'),
+  ('a_summary', 'Power test'),
+  ('led_summary', 'Clock configuration'),
+  ('eeprom_summary', 'EEPROM configuration'),
+  ('jitter_summary', 'Jitter analysis'),
+  ('vme_summary', 'Basic VME test'),
+  ('fpgaclk_summary', 'FPGA clock test'),
+  ('sysmon_summary', 'System monitoring test'),
+  ('prom_summary', 'PROM test'),
+  ('ccb_summary', 'CCB test'),
+  ('otmb_summary', 'OTMB test'),
+  ('lvmb_summary', 'LVMB/LVMB7 test'),
+  ('dcfebjtag_summary', 'DCFEB JTAG test'),
+  ('dcfebfastsignal_summary', 'DCFEB fast signal test'),
+  ('opticalprbs_summary', 'Optical PRBS test'),
+  ('medterm_summary', 'Med-term board-to-board IBERT test'),
+  ('hist_summary', 'Step 27 test'),
+  ('dlfix_summary', 'DL fix verification'),
+)
+
+class AnalysisForm(forms.Form):
+  BOARD_TYPE_CHOICES = (
+    ('1', 'ODMB5Rev3'),
+    ('2', 'ODMB7Rev6'),
+    ('5', 'ODMB5Rev4'),
+    ('4', 'ODMB7Rev7'),
+  )
+  site = forms.ChoiceField(
+    label='Board test status from',
+    choices=(('ucsb', 'Test status at UCSB'), ('b904', 'Test status at B904')),
+    widget=forms.RadioSelect,
+    initial='ucsb',
+  )
+  board_types = forms.MultipleChoiceField(
+    label='Board types to display (select 1–4)',
+    choices=BOARD_TYPE_CHOICES,
+    widget=forms.CheckboxSelectMultiple,
+    initial=[choice[0] for choice in BOARD_TYPE_CHOICES],
+  )
+  grouping = forms.ChoiceField(
+    label='Group columns by',
+    choices=(('none', 'None'), ('terragreen', 'TerraGreen'), ('location', 'Current location')),
+    initial='none',
+  )
+
+  def clean_board_types(self):
+    board_types = self.cleaned_data['board_types']
+    if not 1 <= len(board_types) <= len(self.BOARD_TYPE_CHOICES):
+      raise ValidationError(f'Select between 1 and {len(self.BOARD_TYPE_CHOICES)} board types.')
+    return board_types
+
+class TestPortionAnalysisForm(forms.Form):
+  site = forms.ChoiceField(
+    label='Test results from',
+    choices=(('ucsb', 'Tests at UCSB'), ('b904', 'Tests at B904')),
+    widget=forms.RadioSelect,
+    initial='ucsb',
+  )
+  board_types = forms.MultipleChoiceField(
+    label='Board types to include (select 1–4)',
+    choices=AnalysisForm.BOARD_TYPE_CHOICES,
+    widget=forms.CheckboxSelectMultiple,
+    initial=['5', '4'],
+  )
+  locations = forms.MultipleChoiceField(
+    label='Current locations to include',
+    choices=(),
+    widget=forms.CheckboxSelectMultiple,
+  )
+  terragreens = forms.MultipleChoiceField(
+    label='TerraGreen types to include',
+    choices=(),
+    widget=forms.CheckboxSelectMultiple,
+  )
+  tests = forms.MultipleChoiceField(
+    label='Tests to display (select 1–19)',
+    choices=ANALYSIS_TEST_CHOICES,
+    widget=forms.CheckboxSelectMultiple,
+    initial=[choice[0] for choice in ANALYSIS_TEST_CHOICES],
+  )
+  display_mode = forms.ChoiceField(
+    label='Display values as',
+    choices=(('percentage', 'Percentage'), ('number', 'Number of boards')),
+    widget=forms.RadioSelect,
+    initial='percentage',
+  )
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    location_choices = [(str(location.pk), str(location)) for location in Location.objects.order_by('name')]
+    location_choices.append(('none', 'No location'))
+    self.fields['locations'].choices = location_choices
+    self.fields['locations'].initial = [choice[0] for choice in location_choices]
+
+    terragreen_choices = [(str(terragreen.pk), str(terragreen)) for terragreen in TerraGreen.objects.order_by('name')]
+    terragreen_choices.append(('none', 'No TerraGreen'))
+    self.fields['terragreens'].choices = terragreen_choices
+    self.fields['terragreens'].initial = [choice[0] for choice in terragreen_choices]
+
+  def clean_board_types(self):
+    board_types = self.cleaned_data['board_types']
+    if not 1 <= len(board_types) <= len(AnalysisForm.BOARD_TYPE_CHOICES):
+      raise ValidationError(f'Select between 1 and {len(AnalysisForm.BOARD_TYPE_CHOICES)} board types.')
+    return board_types
+
+  def clean_locations(self):
+    locations = self.cleaned_data['locations']
+    if not locations:
+      raise ValidationError('Select at least one current location.')
+    return locations
+
+  def clean_terragreens(self):
+    terragreens = self.cleaned_data['terragreens']
+    if not terragreens:
+      raise ValidationError('Select at least one TerraGreen type.')
+    return terragreens
+
+  def clean_tests(self):
+    tests = self.cleaned_data['tests']
+    if not 1 <= len(tests) <= len(ANALYSIS_TEST_CHOICES):
+      raise ValidationError(f'Select between 1 and {len(ANALYSIS_TEST_CHOICES)} tests.')
+    return tests
+
 class BoardTestForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
+    lock_board = kwargs.pop('lock_board', False)
     super(BoardTestForm, self).__init__(*args, **kwargs)
     self.fields['board'].help_text = 'Format is BOARD_TYPE#BOARD_ID <br> BOARD_TYPE: '+", ".join([str(bt) for bt in BoardType.objects.all()]) if len(BoardType.objects.all())!= 0 else 'Format is BOARD_TYPE#BOARD_ID <br> But there are no BOARD_TYPEs.'
     self.fields['date'].help_text = 'Format is YYYY-MM-DD HH:MM'
+    if lock_board:
+      self.fields['board'].disabled = True
+      self.fields['board'].help_text = 'The board associated with an existing log cannot be changed.'
+    else:
+      self.fields['test_status_update'] = forms.ChoiceField(
+        label='Update test status (optional)',
+        required=False,
+        choices=(('', '— No change —'),) + tuple(Board.TestStatus.choices),
+        help_text='Leave this unchanged unless you intentionally want to update the board status.',
+      )
+
+  def clean(self):
+    cleaned_data = super().clean()
+    status_update = cleaned_data.get('test_status_update')
+    location = cleaned_data.get('location')
+    if status_update and (location is None or location.pk not in (1, 5)):
+      raise ValidationError('A test status can only be updated by a log at UCSB or B904.')
+    return cleaned_data
+
   board = BoardChoiceField()
   class Meta:
     model = Log
@@ -593,5 +739,3 @@ class TestFilterForm(forms.Form):
     self.fields['deselect'] = forms.BooleanField(label='deselect all', required=False)
     #for itest in range(5):
     #  self.fields[f'test{itest+1}'] = forms.BooleanField(label=f'Test {itest+1}', required=False)
-
-

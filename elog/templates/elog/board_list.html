@@ -3,6 +3,12 @@
 {% load crispy_forms_tags %}
 {% block content %}
   <h1>Board List</h1>
+  {% if request.GET.analysis_status or request.GET.analysis_result %}
+    <div class="alert alert-info">
+      Showing boards selected from a test-analysis graph.
+      <a href="{% url 'boards' %}">Clear analysis filters</a>
+    </div>
+  {% endif %}
   <button onclick="location.href='{% url 'board-create' %}'" type="button">Create new board</button>
   {% crispy filter.form filter.form.helper %}
 {% if board_list %}

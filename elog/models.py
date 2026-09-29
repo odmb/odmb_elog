@@ -38,6 +38,13 @@ from django.db.models.signals import post_delete
 
 class Board(models.Model):
   """Model representing each board."""
+  class TestStatus(models.TextChoices):
+    FULLY_TESTED = 'fully_tested', 'Fully tested with no known issues'
+    NOT_FULLY_TESTED = 'not_fully_tested', 'Not fully tested'
+    UNDER_DEBUGGING = 'under_debugging', 'Under debugging'
+    UNDER_REPAIRING = 'under_repairing', 'Under repairing'
+    TEST_STAND = 'test_stand', 'Test stand'
+
   board_id = models.IntegerField(help_text="Enter board id number")
   board_type = models.ForeignKey('BoardType', on_delete=models.RESTRICT)
   location = models.ForeignKey('Location', on_delete=models.SET_NULL, null=True)
@@ -52,6 +59,18 @@ class Board(models.Model):
   tests = models.OneToOneField('Tests', on_delete=models.SET_NULL, null=True, blank=True)
   storage_box = models.CharField(max_length=200, null=True, blank=True, help_text="Enter B904 storage box number")
   storage_box_log_id = models.IntegerField(null=True, blank=True)
+  ucsb_test_status = models.CharField(
+    max_length=30,
+    choices=TestStatus.choices,
+    default=TestStatus.NOT_FULLY_TESTED,
+  )
+  ucsb_status_auto_update = models.BooleanField(default=True, verbose_name='Automatically update UCSB test status')
+  b904_test_status = models.CharField(
+    max_length=30,
+    choices=TestStatus.choices,
+    default=TestStatus.NOT_FULLY_TESTED,
+  )
+  b904_status_auto_update = models.BooleanField(default=True, verbose_name='Automatically update B904 test status')
 
   def get_absolute_url(self):
     """Returns the URL to access a particular instance of the model."""
@@ -500,4 +519,3 @@ class Tests(models.Model):
   def __str__(self):
     """String for representing Model object."""
     return str(self.id)
-
