@@ -20,6 +20,17 @@ class BoardChoiceField(forms.ModelChoiceField):
       return ''
 
   def clean(self, value):
+    # A disabled ModelChoiceField is cleaned with its stored value while an
+    # existing log is edited. Accept the Board (or its primary key) directly;
+    # newly entered values still use the BOARD_TYPE#BOARD_ID validation below.
+    if isinstance(value, Board):
+      return value
+    if isinstance(value, int):
+      try:
+        return self.queryset.get(pk=value)
+      except Board.DoesNotExist:
+        raise forms.ValidationError("Board name is not correct")
+
     board_name = value
     if board_name is not None:
       board_name_split = board_name.split('#')
